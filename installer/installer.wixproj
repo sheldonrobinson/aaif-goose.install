@@ -1,0 +1,48 @@
+﻿<Project Sdk="WixToolset.Sdk/5.0.2">
+	<PropertyGroup>
+		<AcceptEula>wix5</AcceptEula>
+		<OutputType>Package</OutputType>
+		<Platform>x64</Platform>
+		<!-- Versioning -->
+		<ProductVersion>0.0.0.0</ProductVersion>
+		<ShortVer>0.0.0</ShortVer>
+		<!-- Build switches -->
+		<BuildType>Machine</BuildType>
+		<!-- Machine | User -->
+		<!-- Binary root -->
+		<SourceDir>..\bin\Release</SourceDir>
+	</PropertyGroup>
+	<!-- GLOBAL preprocessor constants (apply to ALL .wxs files) -->
+	<PropertyGroup Label="Globals">
+		<DefineConstants>
+				$(DefineConstants);
+				BuildType=$(BuildType);
+				ProductVersion=$(ProductVersion);
+				SourceDir=$(SourceDir);
+			</DefineConstants>
+	</PropertyGroup>
+	<!-- WiX extensions -->
+	<ItemGroup>
+	  <PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
+	  <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
+	</ItemGroup>
+
+	<!-- WiX 4 extensions -->
+	<ItemGroup>
+		<WixExtension Include="WixToolset.Util.wixext" Version="5.0.2"  />
+		<WixExtension Include="WixToolset.UI.wixext" Version="5.0.2" />
+	</ItemGroup>
+	
+	<!-- CONDITIONAL compilation of Product roots -->
+	<!-- Conditional compilation -->
+	<ItemGroup>
+		<Compile Include="Product.wxs" />
+	</ItemGroup>
+	<!-- Output naming -->
+	<PropertyGroup Condition="'$(BuildType)' == 'Machine'">
+		<OutputName>GooseDesktop-superuser-$(ShortVer)</OutputName>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(BuildType)' == 'User'">
+		<OutputName>GooseDesktop-enduser-$(ShortVer)</OutputName>
+	</PropertyGroup>
+</Project>

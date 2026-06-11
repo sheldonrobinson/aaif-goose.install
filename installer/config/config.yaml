@@ -710,7 +710,7 @@ extensions:
 providers:
   openai:
     enabled: true
-    model: ggml-org/gemma-4-26B-A4B-it-GGUF:Q4_K_M
+    model: unsloth/gemma-4-26B-A4B-it-GGUF:UD-Q4_K_XL
     configured: true
 OPENAI_BASE_URL: http://localhost:11434
 OPENAI_HOST: http://localhost:11434

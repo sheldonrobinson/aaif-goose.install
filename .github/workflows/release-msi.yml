@@ -274,7 +274,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: msi-packages
-          path: msi-output/*.msi
+          path: msi-output/{User,Machine}/*.msi
           if-no-files-found: error
           retention-days: 7
 
@@ -295,7 +295,7 @@ jobs:
           path: msi-output/
 
       - name: List downloaded files
-        run: ls -lh msi-output/
+        run: find "$(pwd)" -type f -name "*.msi"
 
       # ── 2. Checkout for git log ───────────────────────────
       - name: Checkout repository

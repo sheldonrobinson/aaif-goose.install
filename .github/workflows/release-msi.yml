@@ -109,6 +109,7 @@ jobs:
         shell: pwsh
         run: |
           .\installer\build.ps1 `
+            -ScriptDir "${{ github.workspace }}\installer" `
             -SourceDir "${{ github.workspace }}\goose-bin" `
             -OutputDir "${{ github.workspace }}\msi-output"
 

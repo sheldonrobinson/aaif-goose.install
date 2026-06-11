@@ -1,4 +1,4 @@
-# AIFF Goose – WiX 5.0.x MSI Installer Project
+# AIFF Goose – WiX MSI Installer Project
 
 ## Project Structure
 

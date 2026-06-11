@@ -37,16 +37,6 @@ on:
     tags:
       - "v*"
 
-  # Manual trigger – lets you pass a one-off ZIP URL without changing secrets
-  workflow_dispatch:
-    inputs:
-      zip_url:
-        description: "Direct download URL for the pre-built Goose ZIP"
-        required: true
-      tag_name:
-        description: "Version tag to release as (e.g. v1.2.3)"
-        required: true
-
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false

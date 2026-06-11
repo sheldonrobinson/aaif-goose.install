@@ -49,6 +49,7 @@ param(
     [ValidateSet("machine","user","both")]
     [string]$Variant      = "both",
 
+    [string]$ScriptDir    = $PSScriptRoot,
     [string]$SourceDir    = (Join-Path $PSScriptRoot "..\src\bin\Release"),
     [string]$OutputDir    = (Join-Path $PSScriptRoot "output"),
     [string]$WixTargetsPath       = "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\WixToolset\5.0\Imports\WixToolset.targets",
@@ -68,7 +69,6 @@ $ErrorActionPreference = "Stop"
 
 $null = New-Item -ItemType Directory -Force -Path $OutputDir
 
-$srcDir  = $PSScriptRoot
 $iconDir = Join-Path $PSScriptRoot "icons"
 
 # ---------------------------------------------------------------------------
@@ -278,7 +278,7 @@ if ($Variant -in "machine","both") {
 	$prefix = "GooseDesktop-superuser"
 	$fileName = "{0}-{1}.msi" -f $prefix, $shortVer
     $msi = Join-Path $OutputFolder $fileName
-    Invoke-WixBuild -WixProject (Join-Path $srcDir "installer.wixproj") `
+    Invoke-WixBuild -WixProject (Join-Path $ScriptDir "installer.wixproj") `
 					-BuildType  "Machine" `
 					-prefix     $prefix `
 					-ProductVersion $version `
@@ -295,7 +295,7 @@ if ($Variant -in "user","both") {
 	$prefix = "GooseDesktop-enduser"
 	$fileName = "{0}-{1}.msi" -f $prefix, $shortVer
     $msi = Join-Path $OutputFolder $fileName
-    Invoke-WixBuild -WixProject (Join-Path $srcDir "installer.wixproj") `
+    Invoke-WixBuild -WixProject (Join-Path $ScriptDir "installer.wixproj") `
 					-BuildType  "User" `
 					-prefix     $prefix `
 					-ProductVersion $version `

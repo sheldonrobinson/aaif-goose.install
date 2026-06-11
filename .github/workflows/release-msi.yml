@@ -105,11 +105,7 @@ jobs:
       # ── 5. Build both MSI ──────────────────────────
       - name: Build per-machine MSI
         shell: pwsh
-        run: |
-          .\installer\build.ps1 `
-            -ScriptDir "${{ github.workspace }}\installer" `
-            -SourceDir "${{ github.workspace }}\goose-bin" `
-            -OutputDir "${{ github.workspace }}\msi-output"
+        run: ${{ github.workspace }}\installer\build.ps1 -ScriptDir "${{ github.workspace }}\installer" -SourceDir "${{ github.workspace }}\goose-bin" -OutputDir "${{ github.workspace }}\msi-output"
 
       # ── 6. List build output ──────────────────────────────
       - name: List MSI output

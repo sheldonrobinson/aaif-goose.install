@@ -263,10 +263,10 @@ function Invoke-Sign {
 # ---------------------------------------------------------------------------
 $built = @()
 
-# Download-Extract -zipUrl $downloadURL `
-#				 -stagingPath $stagingDir `
-#				 -targetFolder $SourceDir `
-#				 -subfolderName "dist-windows"
+Download-Extract -zipUrl $downloadURL `
+				 -stagingPath $stagingDir `
+				 -targetFolder $SourceDir `
+				 -subfolderName "dist-windows"
 
 if (-not (Test-Path $SourceDir)) {
     throw "SourceDir not found: $SourceDir`nBuild Goose.exe first, or pass -SourceDir."

@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+	<Package Name="Goose Desktop"
+	         Language="1033"
+	         Version="$(ProductVersion)"
+	         Manufacturer="Konnek Inc"
+	         UpgradeCode="E3A1C2D4-5F67-4B89-A012-3C4D5E6F7A8B"
+	         Scope="per$(BuildType)"
+	         InstallerVersion="500"
+	         Compressed="yes">
+		<MediaTemplate EmbedCab="yes"
+		               CompressionLevel="high"/>
+		<!-- ================================================================
+         Properties
+    ================================================================ -->
+		<Property Id="SILENT"
+		          Value="0"/>
+		<Property Id="ARPPRODUCTICON"
+		          Value="GooseIcon"/>
+		<Property Id="ARPHELPLINK"
+		          Value="https://github.com/aaif-goose/goose"/>
+		<Property Id="ARPURLINFOABOUT"
+		          Value="https://github.com/aaif-goose/goose"/>
+		<Property Id="WIXUI_INSTALLDIR"
+		          Value="INSTALLFOLDER"/>
+		<!-- Persist install dir across upgrades via registry search -->
+		<Property Id="INSTALLFOLDER"
+		          Secure="yes">
+				  <?if $(BuildType) = "Machine" ?>
+			<RegistrySearch Id="InstallFolderSearch"
+			                Root="HKLM"
+			                Key="SOFTWARE\Konnek\Goose"
+			                Name="InstallPath"
+			                Type="raw"/>
+					<?else ?>
+			<RegistrySearch Id="InstallFolderSearch"
+			                Root="HKCU"
+			                Key="SOFTWARE\Konnek\Goose"
+			                Name="InstallPath"
+			                Type="raw"/>
+					<?endif ?>
+		</Property>
+		<!-- ================================================================
+         Upgrade logic
+           - MajorUpgrade handles removal of the old MSI before
+             new files are placed (Schedule=afterInstallInitialize).
+           - AllowSameVersionUpgrades=no blocks same-version reinstalls.
+           - Downgrades are blocked with a user-facing error.
+    ================================================================ -->
+		<MajorUpgrade DowngradeErrorMessage="A newer version of Goose Desktop is already installed. Setup will now exit."
+		              Schedule="afterInstallInitialize"
+		              AllowSameVersionUpgrades="no"/>
+		<!-- ================================================================
+         Features
+    ================================================================ -->
+		<Feature Id="ProductFeature"
+		         Title="Goose Desktop"
+		         Description="Installs Goose Desktop and all required components."
+		         Level="1"
+		         ConfigurableDirectory="INSTALLFOLDER">
+			<ComponentGroupRef Id="ProductComponents"/>
+			<ComponentGroupRef Id="StartMenuComponents"/>
+			<ComponentGroupRef Id="ConfigComponents"/>
+		</Feature>
+		<!-- ================================================================
+         UI
+         When built with -dSILENT=1 (build.ps1 -Silent), WixUI_Minimal
+         is used so no dialogs appear. Otherwise the custom three-step
+         GooseUI sequence is shown.
+    ================================================================ -->
+		<!-- Use ui:WixUI instead of UIRef -->
+		<ui:WixUI Id="WixUI_Minimal"/>
+		<WixVariable Id="WixUILicenseRtf"
+		             Value="License.rtf"/>
+		<WixVariable Id="WixUIBannerBmp"
+		             Value="bitmaps\banner.bmp"/>
+		<WixVariable Id="WixUIDialogBmp"
+		             Value="bitmaps\dialog.bmp"/>
+	</Package>
+	<Fragment>
+			   <?if $(var.BuildType) = "Machine" ?>
+		<!-- %PROGRAMFILES%\Goose\ -->
+		<Directory Id="ProgramFiles64Folder">
+			<Directory Id="INSTALLFOLDER"
+			           Name="Goose"/>
+		</Directory>
+		<!-- %PROGRAMDATA%\Microsoft\Windows\Start Menu\Programs\ -->
+		<Directory Id="ProgramMenuFolder">
+			<Directory Id="KonnekStartMenuDir"
+			           Name="Konnek"/>
+		</Directory>
+		<!-- %PROGRAMDATA%\Block\goose\ – config file for the installing user -->
+		<Directory Id="CommonAppDataFolder">
+			<Directory Id="AppDataBlock"
+			           Name="Block">
+				<Directory Id="AppDataGoose"
+				           Name="goose">
+					<Directory Id="AppDataGooseConfig"
+					           Name="config"/>
+				</Directory>
+			</Directory>
+		</Directory>
+		<?else?>
+		<!-- %LOCALAPPDATA%\Programs\ -->
+		<Directory Id="LocalAppDataFolder">
+			<Directory Id="LocalPrograms"
+			           Name="Programs">
+				<Directory Id="INSTALLFOLDER"
+				           Name="Goose"/>
+			</Directory>
+		</Directory>
+		<!-- Per-user Start Menu: %APPDATA%\Microsoft\Windows\Start Menu\Programs\ -->
+		<Directory Id="AppDataFolder">
+			<!-- existing – Start Menu -->
+			<Directory Id="AppDataMicrosoft"
+			           Name="Microsoft">
+				<Directory Id="AppDataWindows"
+				           Name="Windows">
+					<Directory Id="AppDataStartMenu"
+					           Name="Start Menu">
+						<Directory Id="AppDataPrograms"
+						           Name="Programs">
+							<Directory Id="KonnekStartMenuDir"
+							           Name="Konnek"/>
+						</Directory>
+					</Directory>
+				</Directory>
+			</Directory>
+			<!-- ADD – %APPDATA%\Block\goose\config for config file -->
+			<Directory Id="AppDataBlock"
+			           Name="Block">
+				<Directory Id="AppDataGoose"
+				           Name="goose">
+					<Directory Id="AppDataGooseConfig"
+					           Name="config"/>
+				</Directory>
+			</Directory>
+		</Directory>
+		<?endif?>
+	</Fragment>
+	<!-- ARP icon -->
+	<Fragment>
+		<Icon Id="GooseIcon"
+		      SourceFile="icons\goose.ico"/>
+		<Icon Id="HelpIcon"
+		      SourceFile="icons\help.ico"/>
+		<Icon Id="InfoIcon"
+		      SourceFile="icons\info.ico"/>
+		<Icon Id="StartIcon"
+		      SourceFile="icons\start.ico"/>
+		<Icon Id="StopIcon"
+		      SourceFile="icons\stop.ico"/>
+		<Icon Id="SysCtlIcon"
+		      SourceFile="icons\sysctl.ico"/>
+		<Icon Id="UninstallIcon"
+		      SourceFile="icons\uninstall.ico"/>
+		<Icon Id="UserIcon"
+		      SourceFile="icons\user.ico"/>
+	</Fragment>
+	<!-- ================================================================
+       Directory tree  (structure defined in Directory.wxi)
+  ================================================================ -->
+	<!-- ── Main application files ──────────────────────────────────── -->
+	<Fragment>
+		<DirectoryRef Id="INSTALLFOLDER">
+			<Component Id="GooseExe"
+			           Guid="A1B2C3D4-E5F6-7890-AB12-CD34EF567890">
+				<File Id="Goose_exe"
+				      Name="Goose.exe"
+				      Source="$(SourceDir)\Goose.exe"
+				      KeyPath="yes"
+				      Checksum="yes"/>
+			</Component>
+			<!-- Registry – persists install path for upgrade detection -->
+			<Component Id="RegistryEntry"
+			           Guid="B2C3D4E5-F6A7-8901-BC23-DE45FA678901">
+				<?if $(BuildType) = "Machine" ?>
+				<RegistryKey Root="HKLM"
+				             Key="SOFTWARE\Konnek\Goose"
+				             ForceDeleteOnUninstall="yes">
+					<RegistryValue Name="InstallPath"
+					               Type="string"
+					               Value="[INSTALLFOLDER]"
+					               KeyPath="yes"/>
+					<RegistryValue Name="Version"
+					               Type="string"
+					               Value="$(ProductVersion)"/>
+				</RegistryKey>
+				<?else ?>
+				<RegistryKey Root="HKCU"
+				             Key="SOFTWARE\Konnek\Goose"
+				             ForceDeleteOnUninstall="yes">
+					<RegistryValue Name="InstallPath"
+					               Type="string"
+					               Value="[INSTALLFOLDER]"
+					               KeyPath="yes"/>
+					<RegistryValue Name="Version"
+					               Type="string"
+					               Value="$(ProductVersion)"/>
+				</RegistryKey>
+				<?endif ?>
+			</Component>
+		</DirectoryRef>
+	</Fragment>
+	<Fragment>
+		<ComponentGroup Id="ProductComponents">
+			<ComponentRef Id="GooseExe"/>
+			<ComponentRef Id="RegistryEntry"/>
+			<Files Include="$(SourceDir)\**"/>
+		</ComponentGroup>
+	</Fragment>
+	<!-- ── Start Menu shortcuts ─────────────────────────────────────── -->
+	<Fragment>
+		<DirectoryRef Id="KonnekStartMenuDir">
+			<Component Id="StartMenuShortcut"
+			           Guid="C3D4E5F6-A7B8-9012-CD34-EF56AB789012">
+				<Shortcut Id="GooseStartMenuShortcut"
+				          Name="Goose Desktop"
+				          Description="Launch Goose Desktop"
+				          Target="[INSTALLFOLDER]Goose.exe"
+				          WorkingDirectory="INSTALLFOLDER"
+				          Icon="GooseIcon"
+				          IconIndex="0"/>
+				<util:InternetShortcut Id="GooseDocsStartMenuShortcut"
+				                       Name="Goose Docs"
+				                       Target="https://goose-docs.ai/docs/"
+				                       Type="url"
+									   IconFile="icons\help.ico"
+									   IconIndex="0"/>
+				<Shortcut Id="GooseUninstallShortcut"
+				          Name="Uninstall Goose Desktop"
+				          Description="Remove Goose Desktop from this computer"
+				          Target="[System64Folder]msiexec.exe"
+				          Arguments="/x [ProductCode]"
+				          Icon="UninstallIcon"
+				          IconIndex="0"/>
+				<RemoveFolder Id="RemoveGooseStartMenuDir"
+				              Directory="KonnekStartMenuDir"
+				              On="uninstall"/>
+				<?if $(BuildType) = "Machine" ?>
+				<RegistryValue Root="HKLM"
+				               Key="SOFTWARE\Konnek\Goose\StartMenu"
+				               Name="installed"
+				               Type="integer"
+				               Value="1"
+				               KeyPath="yes"/>
+				<?else ?>
+				<RegistryValue Root="HKCU"
+				               Key="SOFTWARE\Konnek\Goose\StartMenu"
+				               Name="installed"
+				               Type="integer"
+				               Value="1"
+				               KeyPath="yes"/>
+				<?endif ?>
+			</Component>
+		</DirectoryRef>
+	</Fragment>
+	<Fragment>
+		<ComponentGroup Id="StartMenuComponents">
+			<ComponentRef Id="StartMenuShortcut"/>
+		</ComponentGroup>
+	</Fragment>
+	<!-- install config.yaml, never overwrite on upgrade -->
+	<Fragment>
+		<DirectoryRef Id="AppDataGooseConfig">
+			<!--
+			  NeverOverwrite="yes" – if config.yaml already exists (upgrade / repair)
+			  the user's edits are preserved. The file is only written on a fresh install.
+			-->
+			<Component Id="GooseConfig"
+			           Guid="C1D2E3F4-A5B6-7890-C1D2-E3F4A5B67890"
+			           NeverOverwrite="yes">
+				<File Id="GooseConfigYaml"
+				      Name="config.yaml"
+				      Source="config\config.yaml"
+				      KeyPath="yes"/>
+				<!-- Remove the Block\goose\config folder on uninstall if it is empty -->
+				<RemoveFolder Id="RemoveAppDataGooseConfig"
+				              Directory="AppDataGooseConfig"
+				              On="uninstall"/>
+				<RemoveFolder Id="RemoveAppDataGoose"
+				              Directory="AppDataGoose"
+				              On="uninstall"/>
+				<RemoveFolder Id="RemoveAppDataBlock"
+				              Directory="AppDataBlock"
+				              On="uninstall"/>
+			</Component>
+		</DirectoryRef>
+	</Fragment>
+	<Fragment>
+		<ComponentGroup Id="ConfigComponents">
+			<ComponentRef Id="GooseConfig"/>
+		</ComponentGroup>
+	</Fragment>
+</Wix>

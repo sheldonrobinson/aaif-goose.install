@@ -1,0 +1,724 @@
+extensions:
+  todo:
+    enabled: true
+    type: platform
+    name: todo
+    description: Enable a todo list for goose so it can keep track of what it is doing
+    display_name: Todo
+    bundled: true
+    available_tools: []
+  apps:
+    enabled: false
+    type: platform
+    name: apps
+    description: Create and manage custom Goose apps through chat. Apps are HTML/CSS/JavaScript and run in sandboxed windows.
+    display_name: Apps
+    bundled: true
+    available_tools: []
+  extensionmanager:
+    enabled: true
+    type: platform
+    name: Extension Manager
+    description: Enable extension management tools for discovering, enabling, and disabling extensions
+    display_name: Extension Manager
+    bundled: true
+    available_tools: []
+  skills:
+    enabled: true
+    type: platform
+    name: skills
+    description: Discover and provide skill instructions from filesystem and builtins
+    display_name: Skills
+    bundled: true
+    available_tools: []
+  developer:
+    enabled: true
+    type: platform
+    name: developer
+    description: Write and edit files, and execute shell commands
+    display_name: Developer
+    bundled: true
+    available_tools: []
+  orchestrator:
+    enabled: true
+    type: platform
+    name: orchestrator
+    description: 'Manage agent sessions: list, view, start, send messages, interrupt, and stop agents'
+    display_name: Orchestrator
+    bundled: true
+    available_tools: []
+  code_execution:
+    enabled: false
+    type: platform
+    name: code_execution
+    description: Goose will make extension calls through code execution, saving tokens
+    display_name: Code Mode
+    bundled: true
+    available_tools: []
+  tom:
+    enabled: false
+    type: platform
+    name: tom
+    description: Inject custom context into every turn via GOOSE_MOIM_MESSAGE_TEXT and GOOSE_MOIM_MESSAGE_FILE environment variables
+    display_name: Top Of Mind
+    bundled: true
+    available_tools: []
+  summarize:
+    enabled: false
+    type: platform
+    name: summarize
+    description: Load files/directories and get an LLM summary in a single call
+    display_name: Summarize
+    bundled: true
+    available_tools: []
+  summon:
+    enabled: true
+    type: platform
+    name: summon
+    description: Load knowledge and delegate tasks to subagents
+    display_name: Summon
+    bundled: true
+    available_tools: []
+  chatrecall:
+    enabled: true
+    type: platform
+    name: chatrecall
+    description: Search past conversations and load session summaries for contextual memory
+    display_name: Chat Recall
+    bundled: true
+    available_tools: []
+  analyze:
+    enabled: true
+    type: platform
+    name: analyze
+    description: 'Analyze code structure with tree-sitter: directory overviews, file details, symbol call graphs'
+    display_name: Analyze
+    bundled: true
+    available_tools: []
+  memory:
+    enabled: true
+    type: builtin
+    name: memory
+    description: Tools to save and retrieve durable memories
+    display_name: Memory
+    timeout: 300
+    bundled: true
+    available_tools: []
+  computercontroller:
+    enabled: true
+    type: builtin
+    name: computercontroller
+    description: controls for webscraping, file caching, and automations
+    display_name: Computer Controller
+    timeout: 300
+    bundled: true
+    available_tools: []
+  autovisualiser:
+    enabled: false
+    type: builtin
+    name: autovisualiser
+    description: Data visualisation and UI generation tools
+    display_name: Auto Visualiser
+    timeout: 300
+    bundled: true
+    available_tools: []
+  chromedevtools:
+    enabled: false
+    type: stdio
+    name: Chrome DevTools
+    description: Browser automation and web performance testing capabilities
+    cmd: npx
+    args:
+    - -y
+    - chrome-devtools-mcp@latest
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  containeruse:
+    enabled: false
+    type: stdio
+    name: Container Use
+    description: Run container automation with container-use
+    cmd: npx
+    args:
+    - -y
+    - mcp-remote
+    - https://container-use.com/mcp
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  councilofmine:
+    enabled: false
+    type: stdio
+    name: Council of Mine
+    description: LLM debate
+    cmd: uvx
+    args:
+    - --from
+    - git+https://github.com/block/mcp-council-of-mine
+    - mcp_council_of_mine
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  fetch:
+    enabled: true
+    type: stdio
+    name: Fetch
+    description: Web content fetching and processing capabilities
+    cmd: uvx
+    args:
+    - mcp-server-fetch
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  gitmcp:
+    enabled: true
+    type: stdio
+    name: GitMCP
+    description: Gets latest documentation for any GitHub project
+    cmd: npx
+    args:
+    - -y
+    - mcp-remote
+    - https://gitmcp.io/docs
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  goosedocs:
+    enabled: false
+    type: stdio
+    name: goose Docs
+    description: GitMCP for goose documentation
+    cmd: npx
+    args:
+    - mcp-remote
+    - https://block.gitmcp.io/goose/
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  knowledgegraphmemory:
+    enabled: true
+    type: stdio
+    name: Knowledge Graph Memory
+    description: Graph-based memory system for persistent knowledge storage
+    cmd: npx
+    args:
+    - -y
+    - '@modelcontextprotocol/server-memory'
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  pdfreader:
+    enabled: false
+    type: stdio
+    name: PDF Reader
+    description: Read large and complex PDF documents
+    cmd: uvx
+    args:
+    - mcp-read-pdf
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  youtubetranscript:
+    enabled: false
+    type: stdio
+    name: YouTube Transcript
+    description: Access YouTube video transcripts
+    cmd: uvx
+    args:
+    - --from
+    - git+https://github.com/jkawamoto/mcp-youtube-transcript
+    - mcp-youtube-transcript
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  sugar:
+    enabled: true
+    type: stdio
+    name: Sugar
+    description: Autonomous AI development system - delegate tasks and run 24/7
+    cmd: npx
+    args:
+    - -y
+    - sugarai-mcp
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  playwright:
+    enabled: false
+    type: stdio
+    name: Playwright
+    description: Modern web testing and automation
+    cmd: npx
+    args:
+    - -y
+    - '@playwright/mcp@latest'
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  selenium:
+    enabled: false
+    type: stdio
+    name: Selenium
+    description: Automates browser interactions
+    cmd: npx
+    args:
+    - -y
+    - '@angiejones/mcp-selenium'
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  rivalsearch:
+    enabled: true
+    type: streamable_http
+    name: Rival Search
+    description: Suite of tools for web retrieval, search, and content discovery
+    uri: https://RivalSearchMCP.fastmcp.app/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  repomix:
+    enabled: false
+    type: stdio
+    name: Repomix
+    description: Pack repositories into AI-friendly formats for goose
+    cmd: npx
+    args:
+    - -y
+    - repomix
+    - --mcp
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  github:
+    enabled: true
+    type: streamable_http
+    name: github
+    description: GitHub Copilot MCP endpoint providing machine‑checkable protocol definitions and tooling for building MCP‑compatible agents and servers.
+    uri: https://api.githubcopilot.com/mcp/
+    envs: {}
+    env_keys:
+    - GITHUB_TOKEN
+    headers:
+      Authorization: Bearer ${GITHUB_TOKEN}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  tradingview:
+    enabled: false
+    type: stdio
+    name: tradingview
+    description: AI-powered trading toolkit for Claude and MCP clients. Backtesting + Live Sentiment + Yahoo Finance + 30+ Technical Analysis Tools — all in one MCP server.
+    cmd: uvx
+    args:
+    - --from
+    - tradingview-mcp-server
+    - tradingview-mcp
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  tutorial:
+    enabled: false
+    type: builtin
+    name: tutorial
+    description: Access interactive tutorials and guides
+    display_name: Tutorial
+    timeout: 300
+    bundled: true
+    available_tools: []
+  context7:
+    enabled: false
+    type: stdio
+    name: Context7
+    description: Use up-to-date code and docs
+    cmd: npx
+    args:
+    - -y
+    - '@upstash/context7-mcp'
+    envs: {}
+    env_keys:
+    - CONTEXT7_API_KEY
+    timeout: 300
+    bundled: null
+    available_tools: []
+  prompts_chat:
+    enabled: true
+    type: stdio
+    name: prompts.chat
+    description: Access thousands of AI prompts directly in your AI assistant
+    cmd: npx
+    args:
+    - -y
+    - '@fkadev/prompts.chat-mcp@latest'
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  beads:
+    enabled: false
+    type: stdio
+    name: Beads
+    description: Git-backed issue tracker for AI agent task management
+    cmd: uvx
+    args:
+    - beads-mcp
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  nostrbook:
+    enabled: false
+    type: stdio
+    name: NostrBook
+    description: Nostr protocol integration for decentralized social
+    cmd: npx
+    args:
+    - -y
+    - '@nostrbook/mcp@latest'
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  huggingface:
+    enabled: false
+    type: streamable_http
+    name: ' Hugging Face'
+    description: Connect assistants to the Hub and thousands of AI Apps
+    uri: https://huggingface.co/mcp
+    envs: {}
+    env_keys:
+    - HF_TOKEN
+    headers:
+      Authorization: Bearer ${HF_TOKEN}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  awsdocumentation:
+    enabled: false
+    type: stdio
+    name: AWS Documentation
+    description: Tools to access AWS documentation, search for content, and get recommendations.
+    cmd: uvx
+    args:
+    - awslabs.aws-documentation-mcp-server@latest
+    envs: {}
+    env_keys:
+    - FASTMCP_LOG_LEVEL
+    - AWS_DOCUMENTATION_PARTITION
+    - MCP_USER_AGENT
+    timeout: 300
+    bundled: null
+    available_tools: []
+  emailserver:
+    enabled: false
+    type: stdio
+    name: Email Server
+    description: IMAP/SMTP email operations with Claude, Cursor, and other AI assistants
+    cmd: npx
+    args:
+    - -y
+    - mcp-mail-server
+    envs: {}
+    env_keys:
+    - IMAP_HOST
+    - IMAP_PORT
+    - IMAP_SECURE
+    - SMTP_HOST
+    - SMTP_PORT
+    - SMTP_SECURE
+    - EMAIL_USER
+    - EMAIL_PASS
+    timeout: 300
+    bundled: null
+    available_tools: []
+  blueskysocial:
+    enabled: false
+    type: stdio
+    name: Bluesky Social
+    description: A full‑featured Bluesky MCP server that adds search, feeds, trends, follower graph tools, thread retrieval, and rich content/engagement management for agentic workflows.
+    cmd: npx
+    args:
+    - -y
+    - '@semihberkay/bluesky-mcp'
+    envs: {}
+    env_keys:
+    - BLUESKY_IDENTIFIER
+    - BLUESKY_SERVICE_URL
+    - BLUESKY_APP_PASSWORD
+    timeout: 300
+    bundled: null
+    available_tools: []
+  mastodonsocial:
+    enabled: false
+    type: stdio
+    name: Mastodon Social
+    description: A minimal Mastodon MCP server providing basic posting, timeline access, and simple social interactions for agentic clients.
+    cmd: uvx
+    args:
+    - --from
+    - mastodon-mcp-server
+    - mastodon-mcp
+    envs: {}
+    env_keys:
+    - MASTODON_INSTANCE
+    - MASTODON_ACCESS_TOKEN
+    timeout: 300
+    bundled: null
+    available_tools: []
+  discord:
+    enabled: false
+    type: stdio
+    name: Discord
+    description: A minimal Discord MCP server that exposes basic message‑sending and channel‑interaction tools for agentic automation.
+    cmd: npx
+    args:
+    - -y
+    - '@pasympa/discord-mcp'
+    envs: {}
+    env_keys:
+    - DISCORD_TOKEN
+    timeout: 300
+    bundled: null
+    available_tools: []
+  reddit:
+    enabled: false
+    type: stdio
+    name: Reddit
+    description: A full‑featured Reddit MCP server that supports posting, commenting, subreddit browsing, inbox access, user history, voting, saving, subscribing, and search for agentic automation.
+    cmd: npx
+    args:
+    - -y
+    - reddit-mcp-buddy
+    envs: {}
+    env_keys:
+    - REDDIT_USERNAME
+    - REDDIT_PASSWORD
+    timeout: 300
+    bundled: null
+    available_tools: []
+  linkedinnewsletter:
+    enabled: false
+    type: stdio
+    name: LinkedIn Newsletter
+    description: A minimal LinkedIn MCP server that exposes basic profile lookup and posting capabilities for lightweight agent automation.
+    cmd: uvx
+    args:
+    - ldraney-linkedin-mcp
+    envs: {}
+    env_keys:
+    - LINKEDIN_PERSON_ID
+    - LINKEDIN_ACCESS_TOKEN
+    timeout: 300
+    bundled: null
+    available_tools: []
+  linkedin:
+    enabled: false
+    type: stdio
+    name: LinkedIn
+    description: A minimal LinkedIn MCP server that enables agents to authenticate, fetch profiles, and perform basic LinkedIn interactions programmatically.
+    cmd: uvx
+    args:
+    - linkedin-scraper-mcp@latest
+    - --transport
+    - stdio
+    envs: {}
+    env_keys:
+    - UV_HTTP_TIMEOUT
+    timeout: 300
+    bundled: null
+    available_tools: []
+  linkedinjobsandnetwork:
+    enabled: false
+    type: stdio
+    name: LinkedIn Jobs and Network
+    description: A lightweight MCP server that exposes LinkedIn search and profile‑scraping capabilities to agentic clients.
+    cmd: npx
+    args:
+    - -y
+    - '@pegasusheavy/linkedin-mcp'
+    envs: {}
+    env_keys:
+    - LINKEDIN_ACCESS_TOKEN
+    timeout: 300
+    bundled: null
+    available_tools: []
+  general:
+    enabled: false
+    type: streamable_http
+    name: General
+    description: 'General information and knowledge about the world, news, people, and events, '
+    uri: http://localhost:3000/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  publicinformationlookup:
+    enabled: false
+    type: streamable_http
+    name: Public Information Lookup
+    description: Assorted lookup services for information on location, weather, and other data
+    uri: http://localhost:3999/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  git:
+    enabled: true
+    type: stdio
+    name: git
+    description: MCP Git Server designed to interact with Git repositories, particularly useful for tasks such as repository management, branch operations, commit handling, and more.
+    cmd: uvx
+    args:
+    - mcp-server-git
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  excel:
+    enabled: false
+    type: stdio
+    name: Excel
+    description: A Model Context Protocol server for Excel file manipulation
+    cmd: uvx
+    args:
+    - excel-mcp-server
+    - stdio
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  judicialresearchagent:
+    enabled: false
+    type: stdio
+    name: Judicial Research Agent
+    description: An MCP server that lets AI agents search and retrieve 3M+ U.S. court decisions and EU legislation via CourtListener and EUR‑Lex for legal research.
+    cmd: uvx
+    args:
+    - --from
+    - legal-court-mcp-server
+    - legal-court-server
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  realestateassistant:
+    enabled: false
+    type: stdio
+    name: Real Estate Assistant
+    description: An MCP server that gives AI agents unified access to U.S. real‑estate data, including property records, valuations, and market insights for analysis and automation.
+    cmd: uvx
+    args:
+    - --from
+    - real-estate-data-mcp-server
+    - real-estate-server
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  jobmarketanalyst:
+    enabled: false
+    type: stdio
+    name: Job Market Analyst
+    description: An MCP server providing global labor‑market data, including unemployment rates, wages, sector employment, and occupation outlooks using official BLS (US) and Eurostat (EU) APIs.
+    cmd: uvx
+    args:
+    - --from
+    - labor-market-mcp-server
+    - labor-market-server
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  crossrefresearchassistant:
+    enabled: false
+    type: stdio
+    name: Crossref Research Assistant
+    description: An MCP server that lets AI agents query Crossref for academic metadata, including DOIs, authors, journals, citations, and publication records for research automation.
+    cmd: uvx
+    args:
+    - --from
+    - crossref-academic-mcp-server
+    - crossref-server
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  shadcn:
+    enabled: false
+    type: stdio
+    name: shadcn
+    description: A shadcn/ui–native MCP server enabling structured component metadata, actions, and UI-aware tooling for agent workflows.
+    cmd: npx
+    args:
+    - -y
+    - shadcn@latest
+    - mcp
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+providers:
+  openai:
+    enabled: true
+    model: ggml-org/gemma-4-26B-A4B-it-GGUF:Q4_K_M
+    configured: true
+OPENAI_BASE_URL: http://localhost:11434
+OPENAI_HOST: http://localhost:11434
+OPENAI_BASE_PATH: v1/chat/completions
+OPENAI_TIMEOUT: '600'
+GOOSE_TELEMETRY_ENABLED: true
+voice_dictation_provider: local
+LOCAL_WHISPER_MODEL: base
+GOOSE_MODE: auto
+GOOSE_DISABLE_KEYRING: true
+active_provider: openai

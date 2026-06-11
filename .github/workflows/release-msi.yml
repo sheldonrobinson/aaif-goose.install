@@ -1,0 +1,365 @@
+# ============================================================
+#  AIFF Goose – MSI Release Workflow (pre-built binary)
+#
+#  Triggers on any tag push matching v* (e.g. v1.2.3)
+#  Can also be run manually via workflow_dispatch.
+#
+#  What it does:
+#    1. Downloads the pre-built Goose ZIP from a URL you supply
+#    2. Extracts Goose.exe into a staging folder
+#    3. Installs WiX 3.11 via Chocolatey
+#    4. Syncs installer/version.txt with the tag, commits it back
+#    5. Builds per-machine AND per-user MSIs via build.ps1
+#    6. Optionally signs both MSIs (set SIGN_MSI=true + cert secrets)
+#    7. Creates a GitHub Release and uploads both MSIs as assets
+#
+#  Required secrets (Settings → Secrets → Actions):
+#    RELEASE_TOKEN        – fine-grained PAT with Contents: write
+#    GOOSE_ZIP_URL        – direct download URL for the pre-built ZIP
+#                          (use a secret if the URL is private/authenticated,
+#                           or hard-code it in env: below if it is public)
+#
+#  Optional signing secrets:
+#    CODESIGN_CERT_BASE64 – PFX certificate encoded as base64
+#    CODESIGN_CERT_PASS   – PFX password
+#    CODESIGN_THUMBPRINT  – SHA-1 thumbprint of the signing cert
+#
+#  env vars you may want to tweak:
+#    SIGN_MSI             – set to 'true' to enable signtool signing
+#    GOOSE_EXE_SUBPATH    – path inside the ZIP to Goose.exe
+#                          e.g. "bin/Goose.exe" or just "Goose.exe"
+# ============================================================
+
+name: Build & Release MSI
+
+on:
+  push:
+    tags:
+      - "v*"
+
+  # Manual trigger – lets you pass a one-off ZIP URL without changing secrets
+  workflow_dispatch:
+    inputs:
+      zip_url:
+        description: "Direct download URL for the pre-built Goose ZIP"
+        required: true
+      tag_name:
+        description: "Version tag to release as (e.g. v1.2.3)"
+        required: true
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  SIGN_MSI:          "false"      # flip to 'true' + add cert secrets to sign
+  GOOSE_EXE_SUBPATH: "Goose.exe" # path inside the ZIP; use subdir if needed
+                                  # e.g. "bin/Goose.exe"
+
+permissions:
+  contents: write
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  #  JOB 1 – Download ZIP, extract Goose.exe, build MSIs
+  # ──────────────────────────────────────────────────────────
+  build-msi:
+    name: Build MSI packages
+    runs-on: windows-latest
+
+    outputs:
+      version:       ${{ steps.get-version.outputs.version }}
+      short-version: ${{ steps.get-version.outputs.short-version }}
+
+    steps:
+      # ── 1. Checkout installer project ────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      # ── 2. Resolve tag + derive version numbers ───────────
+      #       Tag v1.2.3  →  version: 1.2.3.0 | short: 1.2.3
+      - name: Derive version from tag
+        id: get-version
+        shell: pwsh
+        run: |
+          # Prefer the push-event tag; fall back to workflow_dispatch input
+          $rawTag = if ("${{ github.ref_name }}" -ne "") {
+                      "${{ github.ref_name }}"
+                    } else {
+                      "${{ github.event.inputs.tag_name }}"
+                    }
+
+          $ver   = $rawTag.TrimStart('v')
+          $parts = $ver -split '\.'
+          while ($parts.Count -lt 4) { $parts += '0' }
+
+          $full  = $parts[0..3] -join '.'   # 1.2.3.0
+          $short = $parts[0..2] -join '.'   # 1.2.3
+
+          Write-Host "Tag      : $rawTag"
+          Write-Host "Full ver : $full"
+          Write-Host "Short ver: $short"
+
+          "version=$full"        | Out-File $env:GITHUB_OUTPUT -Append
+          "short-version=$short" | Out-File $env:GITHUB_OUTPUT -Append
+
+          # Keep version.txt in sync (build.ps1 reads it as fallback)
+          Set-Content -Path installer/version.txt -Value $full -NoNewline
+
+      # ── 3. Resolve ZIP download URL ───────────────────────
+      #       Priority: workflow_dispatch input > GOOSE_ZIP_URL secret
+      - name: Resolve ZIP URL
+        id: zip-url
+        shell: pwsh
+        run: |
+          $url = if ("${{ github.event.inputs.zip_url }}" -ne "") {
+                   "${{ github.event.inputs.zip_url }}"
+                 } else {
+                   "${{ secrets.GOOSE_ZIP_URL }}"
+                 }
+          if ([string]::IsNullOrWhiteSpace($url)) {
+            throw "No ZIP URL provided. Set the GOOSE_ZIP_URL secret or pass zip_url via workflow_dispatch."
+          }
+          Write-Host "ZIP URL: $url"
+          "url=$url" | Out-File $env:GITHUB_OUTPUT -Append
+
+      # ── 4. Download pre-built ZIP ──────────────────────────
+      - name: Download Goose ZIP
+        shell: pwsh
+        run: |
+          $url  = "${{ steps.zip-url.outputs.url }}"
+          $dest = "${{ github.workspace }}\goose-prebuilt.zip"
+
+          Write-Host "Downloading from: $url"
+          Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing
+
+          if (-not (Test-Path $dest)) {
+            throw "Download failed – file not found at $dest"
+          }
+          $size = (Get-Item $dest).Length
+          Write-Host "Downloaded: $([math]::Round($size/1KB, 1)) KB"
+
+      # ── 5. Extract Goose.exe from ZIP ─────────────────────
+      - name: Extract Goose.exe
+        shell: pwsh
+        run: |
+          $zip      = "${{ github.workspace }}\goose-prebuilt.zip"
+          $out      = "${{ github.workspace }}\goose-extracted"
+          $staging  = "${{ github.workspace }}\goose-bin"
+          $subpath  = "$env:GOOSE_EXE_SUBPATH"
+
+          # Extract entire ZIP first
+          Expand-Archive -Path $zip -DestinationPath $out -Force
+
+          # Find Goose.exe – honour GOOSE_EXE_SUBPATH if set, else search
+          $exeSrc = $null
+          if ($subpath -ne "Goose.exe" -and $subpath -ne "") {
+            $candidate = Join-Path $out $subpath
+            if (Test-Path $candidate) { $exeSrc = $candidate }
+          }
+          if (-not $exeSrc) {
+            # Auto-locate anywhere in the extracted tree
+            $exeSrc = Get-ChildItem -Path $out -Recurse -Filter "Goose.exe" |
+                      Select-Object -First 1 -ExpandProperty FullName
+          }
+          if (-not $exeSrc) {
+            Write-Host "Contents of ZIP:"
+            Get-ChildItem -Path $out -Recurse | Select-Object -ExpandProperty FullName
+            throw "Goose.exe not found inside the ZIP. Check GOOSE_EXE_SUBPATH."
+          }
+
+          Write-Host "Found Goose.exe at: $exeSrc"
+
+          # Copy into a clean staging folder (build.ps1 -SourceDir points here)
+          $null = New-Item -ItemType Directory -Force -Path $staging
+          Copy-Item -Path $exeSrc -Destination (Join-Path $staging "Goose.exe")
+          Write-Host "Staged:  $staging\Goose.exe"
+
+          # Log the file version embedded in the binary
+          $fv = (Get-Item (Join-Path $staging "Goose.exe")).VersionInfo
+          Write-Host "FileVersion in binary: $($fv.FileVersion)"
+
+      # ── 6. Install WiX Toolset 3.11 ───────────────────────
+      - name: Install WiX Toolset 3.11
+        shell: pwsh
+        run: choco install wixtoolset --version 3.11.2 --yes --no-progress
+
+      # ── 7. Build per-machine MSI ──────────────────────────
+      - name: Build per-machine MSI
+        shell: pwsh
+        run: |
+          .\installer\build.ps1 `
+            -Variant  machine `
+            -SourceDir "${{ github.workspace }}\goose-bin" `
+            -OutputDir "${{ github.workspace }}\msi-output"
+
+      # ── 8. Build per-user MSI ─────────────────────────────
+      - name: Build per-user MSI
+        shell: pwsh
+        run: |
+          .\installer\build.ps1 `
+            -Variant  user `
+            -SourceDir "${{ github.workspace }}\goose-bin" `
+            -OutputDir "${{ github.workspace }}\msi-output"
+
+      # ── 9. List build output ──────────────────────────────
+      - name: List MSI output
+        shell: pwsh
+        run: Get-ChildItem "${{ github.workspace }}\msi-output" | Format-Table Name, Length
+
+      # ── 10. (Optional) Import signing certificate ─────────
+      - name: Import code-signing certificate
+        if: env.SIGN_MSI == 'true'
+        shell: pwsh
+        run: |
+          $bytes = [Convert]::FromBase64String("${{ secrets.CODESIGN_CERT_BASE64 }}")
+          $pfx   = "$env:RUNNER_TEMP\codesign.pfx"
+          [IO.File]::WriteAllBytes($pfx, $bytes)
+          Import-PfxCertificate -FilePath $pfx `
+            -CertStoreLocation Cert:\CurrentUser\My `
+            -Password (ConvertTo-SecureString "${{ secrets.CODESIGN_CERT_PASS }}" `
+                       -AsPlainText -Force) | Out-Null
+          Remove-Item $pfx -Force
+          Write-Host "Certificate imported."
+
+      # ── 11. (Optional) Sign both MSIs ─────────────────────
+      - name: Sign MSIs
+        if: env.SIGN_MSI == 'true'
+        shell: pwsh
+        run: |
+          $sv  = "${{ steps.get-version.outputs.short-version }}"
+          $msis = @(
+            "${{ github.workspace }}\msi-output\GooseSetup-$sv.msi",
+            "${{ github.workspace }}\msi-output\GooseSetup-$sv-peruser.msi"
+          )
+          $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" `
+            -Recurse -Filter signtool.exe |
+            Where-Object { $_.FullName -match 'x64' } |
+            Sort-Object FullName -Descending |
+            Select-Object -First 1 -ExpandProperty FullName
+
+          foreach ($msi in $msis) {
+            Write-Host "Signing: $msi"
+            & $signtool sign /fd SHA256 `
+              /sha1 "${{ secrets.CODESIGN_THUMBPRINT }}" `
+              /tr http://timestamp.digicert.com /td SHA256 $msi
+            if ($LASTEXITCODE -ne 0) { throw "Signing failed for $msi" }
+          }
+
+      # ── 12. Commit updated version.txt back to main ───────
+      - name: Commit version.txt
+        shell: pwsh
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          $full = "${{ steps.get-version.outputs.version }}"
+          Set-Content -Path installer/version.txt -Value $full -NoNewline
+          git add installer/version.txt
+
+          $dirty = git status --porcelain
+          if ($dirty) {
+            git commit -m "chore: sync version.txt to $full [skip ci]"
+            git push origin HEAD:${{ github.event.repository.default_branch }}
+            Write-Host "Committed version.txt → $full"
+          } else {
+            Write-Host "version.txt already at $full – nothing to commit."
+          }
+
+      # ── 13. Upload MSIs as workflow artifacts ─────────────
+      - name: Upload MSI artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: msi-packages
+          path: msi-output/*.msi
+          if-no-files-found: error
+          retention-days: 7
+
+  # ──────────────────────────────────────────────────────────
+  #  JOB 2 – Create GitHub Release & attach MSIs
+  # ──────────────────────────────────────────────────────────
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build-msi
+
+    steps:
+      # ── 1. Download MSIs from Job 1 ───────────────────────
+      - name: Download MSI artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: msi-packages
+          path: msi-output/
+
+      - name: List downloaded files
+        run: ls -lh msi-output/
+
+      # ── 2. Checkout for git log ───────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── 3. Auto-generate release notes from git log ───────
+      - name: Generate release notes
+        run: |
+          VERSION="${{ needs.build-msi.outputs.short-version }}"
+          TAG="${{ github.ref_name }}"
+          PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${TAG}$" | head -1)
+
+          if [ -n "$PREV_TAG" ]; then
+            CHANGES=$(git log --oneline "${PREV_TAG}".."${TAG}" \
+              --no-merges --pretty=format:"- %s (%h)" | head -50)
+          else
+            CHANGES="_Initial release._"
+          fi
+
+          cat <<EOF > release_notes.md
+          ## AIFF Goose ${VERSION}
+
+          ### Downloads
+          | Package | Scope |
+          |---------|-------|
+          | \`GooseSetup-${VERSION}.msi\` | Per-machine – installs to \`Program Files\`, requires admin / UAC |
+          | \`GooseSetup-${VERSION}-peruser.msi\` | Per-user – installs to \`LocalAppData\`, no UAC needed |
+
+          ### Install
+
+          **Silent / unattended (per-machine):**
+          \`\`\`
+          msiexec /i GooseSetup-${VERSION}.msi /qn
+          \`\`\`
+          **Silent / unattended (per-user):**
+          \`\`\`
+          msiexec /i GooseSetup-${VERSION}-peruser.msi /qn
+          \`\`\`
+          **Interactive:** double-click either MSI and follow the wizard.
+
+          ### Upgrade / downgrade
+          - Installing a **newer version** automatically removes the old one.
+          - Installing an **older version** over a newer one is blocked with an error.
+
+          ### What changed since ${PREV_TAG:-"the beginning"}
+          ${CHANGES}
+
+          ---
+          *Built from tag \`${TAG}\` · GitHub Actions · $(date -u +"%Y-%m-%d %H:%M UTC")*
+          EOF
+
+      # ── 4. Publish release + upload MSIs ──────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name:   ${{ github.ref_name }}
+          name:       "AIFF Goose ${{ needs.build-msi.outputs.short-version }}"
+          body_path:  release_notes.md
+          draft:      false
+          # Tags with a hyphen (v1.0.0-rc1, v2.0.0-beta) become pre-releases
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: |
+            msi-output/*.msi
+          token: ${{ secrets.RELEASE_TOKEN }}
+          fail_on_unmatched_files: true

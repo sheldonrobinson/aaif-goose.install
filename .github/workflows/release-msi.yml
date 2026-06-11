@@ -39,8 +39,6 @@ concurrency:
 
 env:
   SIGN_MSI:          "false"      # flip to 'true' + add cert secrets to sign
-  GOOSE_EXE_SUBPATH: "Goose.exe" # path inside the ZIP; use subdir if needed
-                                  # e.g. "bin/Goose.exe"
 
 permissions:
   contents: write

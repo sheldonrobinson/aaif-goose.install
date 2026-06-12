@@ -118,13 +118,13 @@ jobs:
           $subfolderName = "dist-windows"
           
           # clean staging
-	      if (Test-Path $stagingDir) { Remove-Item "$stagingDir\*" -Recurse -Force }
+          if (Test-Path $stagingDir) { Remove-Item "$stagingDir\*" -Recurse -Force }
           
           # Ensure staging directory exists
           New-Item -Path $stagingDir -ItemType Directory -Force | Out-Null
           
           # Download ZIP
-		  $zipFilePath = Join-Path $stagingDir "download.zip"
+          $zipFilePath = Join-Path $stagingDir "download.zip"
 
           Write-Host "Downloading from: $downloadUrl"
           Invoke-WebRequest -Uri $downloadUrl -OutFile $zipFilePath -UseBasicParsing
@@ -135,7 +135,7 @@ jobs:
           $size = (Get-Item $zipFilePath).Length
           Write-Host "Downloaded: $([math]::Round($size/1KB, 1)) KB"
 
-		  # Load .NET ZipArchive
+          # Load .NET ZipArchive
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           $zip = [System.IO.Compression.ZipFile]::OpenRead($zipFilePath)
 
@@ -148,7 +148,7 @@ jobs:
           }
 
           # clean staging
-	      if (Test-Path $targetFolder) { Remove-Item "$targetFolder\*" -Recurse -Force }
+          if (Test-Path $targetFolder) { Remove-Item "$targetFolder\*" -Recurse -Force }
           
           # Ensure target folder exists
           New-Item -Path $targetFolder -ItemType Directory -Force | Out-Null
@@ -159,7 +159,7 @@ jobs:
                 # Compute relative path inside subfolder
                 $relativePath = $entry.FullName.Substring($subfolderName.Length + 1)
                 $destinationPath = Join-Path $targetFolder $relativePath
-
+                
                 # Ensure parent directory exists
                 $parentDir = Split-Path $destinationPath
                 if (-not (Test-Path $parentDir)) {
@@ -174,7 +174,7 @@ jobs:
                 $entryStream.Close()
             }
           }
-
+          
           $zip.Dispose()
           Write-Host "Extraction complete."
         
@@ -200,15 +200,15 @@ jobs:
            # Clean intermediate directory
            $BuildDir = Join-Path $OutputDir "build"
            if (Test-Path $BuildDir) { Remove-Item $BuildDir -Recurse -Force }
-	       New-Item -Path $BuildDir -ItemType Directory -Force | Out-Null
+           New-Item -Path $BuildDir -ItemType Directory -Force | Out-Null
            
            Write-Host "Building  $OutputMsi"
            wix build -arch "x64" -outputtype "Package" -culture "en-US" -b $SourceDir -out $OutputMsi `
-			  -intermediatefolder $BuildDir -src $ProductWxs -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext `
-			  -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d SourceDir=$SourceDir -d Scope=$Scope 
-
+            -intermediatefolder $BuildDir -src $ProductWxs -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext `
+            -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d SourceDir=$SourceDir -d Scope=$Scope 
+           
            Write-Host "[ok]  Completed   $OutputMsi"
-
+           
       # ── 6. Build per-User MSI ──────────────────────────
       - name: Build per-machine MSI
         shell: pwsh
@@ -229,14 +229,14 @@ jobs:
            # Clean intermediate directory
            $BuildDir = Join-Path $OutputDir "build"
            if (Test-Path $BuildDir) { Remove-Item $BuildDir -Recurse -Force }
-	       New-Item -Path $BuildDir -ItemType Directory -Force | Out-Null
+           New-Item -Path $BuildDir -ItemType Directory -Force | Out-Null
            
            Write-Host "Building  $OutputMsi"
            wix build -arch "x64" -outputtype "Package" -culture "en-US" -b $SourceDir -out $OutputMsi `
-			  -intermediatefolder $BuildDir -src $ProductWxs -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext `
-			  -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d SourceDir=$SourceDir -d Scope=$Scope 
-
-           Write-Host "[ok]  Completed   $OutputMsi"
+            -intermediatefolder $BuildDir -src $ProductWxs -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext `
+            -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d SourceDir=$SourceDir -d Scope=$Scope 
+          
+          Write-Host "[ok]  Completed   $OutputMsi"
 
 
       # ── 7. List build output ──────────────────────────────

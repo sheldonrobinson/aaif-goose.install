@@ -252,7 +252,7 @@ jobs:
       # ── 7. List build output ──────────────────────────────
       - name: List MSI output
         shell: pwsh
-        run: Get-ChildItem "${{ github.workspace }}\msi-output" | Format-Table Name, Length
+        run: Get-ChildItem "${{ github.workspace }}\msi-output\**\*.msi" | Format-Table Name, Length
 
       # ── 8. (Optional) Import signing certificate ─────────
       - name: Import code-signing certificate
@@ -318,7 +318,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: msi-packages
-          path: msi-output/{User,Machine}/*.msi
+          path: |
+            msi-output/machine/GooseDesktop-superuser-*.msi
+            msi-output/user/GooseDesktop-enduser-*.msi
           if-no-files-found: error
           retention-days: 7
 
@@ -336,7 +338,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: msi-packages
-          path: msi-output/
+          path: |
+            msi-output/machine/GooseDesktop-superuser-*.msi
+            msi-output/user/GooseDesktop-enduser-*.msi            
 
       - name: List downloaded files
         run: find "$(pwd)" -type f -name "*.msi"
@@ -367,18 +371,18 @@ jobs:
           ### Downloads
           | Package | Scope |
           |---------|-------|
-          | \`GooseSetup-${VERSION}.msi\` | Per-machine – installs to \`Program Files\`, requires admin / UAC |
-          | \`GooseSetup-${VERSION}-peruser.msi\` | Per-user – installs to \`LocalAppData\`, no UAC needed |
+          | \`GooseDesktop-superuser-${VERSION}.msi\` | Per-machine – installs to \`Program Files\`, requires admin / UAC |
+          | \`GooseDesktop-enduser-${VERSION}.msi\` | Per-user – installs to \`LocalAppData\`, no UAC needed |
 
           ### Install
 
           **Silent / unattended (per-machine):**
           \`\`\`
-          msiexec /i GooseSetup-${VERSION}.msi /qn
+          msiexec /i GooseDesktop-superuser-${VERSION}.msi /qn
           \`\`\`
           **Silent / unattended (per-user):**
           \`\`\`
-          msiexec /i GooseSetup-${VERSION}-peruser.msi /qn
+          msiexec /i GooseDesktop-enduser-${VERSION}.msi /qn
           \`\`\`
           **Interactive:** double-click either MSI and follow the wizard.
 

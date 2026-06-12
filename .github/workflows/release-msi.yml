@@ -180,13 +180,14 @@ jobs:
           Write-Host "Staged:  $stagingDir"
       
       # ── 5. Build per-Machine MSI ──────────────────────────
-      - name: Build per-machine MSI
+      - name: Build per-Machine MSI
         shell: pwsh
         run: |
            $ShortVer  = "${{ steps.get-version.outputs.short-version }}"
            $SourceDir  = "${{ github.workspace }}\goose-bin"
            $OutputDir  = "${{ github.workspace }}\msi-output\machine"
            $ProductWxs  = "${{ github.workspace }}\installer\Product.wxs"
+
            
            $Outfile  = "GooseDesktop-superuser-{0}.msi" -f $ShortVer
            $OutputMsi = Join-Path $OutputDir  $Outfile
@@ -209,13 +210,14 @@ jobs:
            Write-Host "[ok]  Completed   $OutputMsi"
            
       # ── 6. Build per-User MSI ──────────────────────────
-      - name: Build per-machine MSI
+      - name: Build per-User MSI
         shell: pwsh
         run: |
            $ShortVer  = "${{ steps.get-version.outputs.short-version }}"
            $SourceDir  = "${{ github.workspace }}\goose-bin"
            $OutputDir  = "${{ github.workspace }}\msi-output\user"
            $ProductWxs  = "${{ github.workspace }}\installer\Product.wxs"
+
            
            $Outfile  = "GooseDesktop-enduser-{0}.msi" -f $ShortVer
            $OutputMsi = Join-Path $OutputDir  $Outfile
@@ -235,7 +237,7 @@ jobs:
             -intermediatefolder $BuildDir -src $ProductWxs -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext `
             -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d SourceDir=$SourceDir -d Scope=$Scope 
           
-          Write-Host "[ok]  Completed   $OutputMsi"
+           Write-Host "[ok]  Completed   $OutputMsi"
 
 
       # ── 7. List build output ──────────────────────────────

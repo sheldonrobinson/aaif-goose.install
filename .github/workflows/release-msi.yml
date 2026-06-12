@@ -320,9 +320,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: msi-packages
-          path: |
-            msi-output/machine/GooseDesktop-superuser-*.msi
-            msi-output/user/GooseDesktop-enduser-*.msi
+          path: msi-output/
           if-no-files-found: error
           retention-days: 7
 
@@ -407,6 +405,6 @@ jobs:
           draft:      false
           # Tags with a hyphen (v1.0.0-rc1, v2.0.0-beta) become pre-releases
           prerelease: ${{ contains(github.ref_name, '-') }}
-          files: msi-output/*.msi
+          files: msi-output/**/*.msi
           token: ${{ secrets.RELEASE_TOKEN }}
           fail_on_unmatched_files: true

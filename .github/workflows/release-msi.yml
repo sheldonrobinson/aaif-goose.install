@@ -408,7 +408,6 @@ jobs:
           # Tags with a hyphen (v1.0.0-rc1, v2.0.0-beta) become pre-releases
           prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
-            msi-output/machine/GooseDesktop-superuser-${{ needs.build-msi.outputs.short-version }}.msi
-            msi-output/user/GooseDesktop-enduser-${{ needs.build-msi.outputs.short-version }}.msi
+            msi-output/
           token: ${{ secrets.RELEASE_TOKEN }}
           fail_on_unmatched_files: true

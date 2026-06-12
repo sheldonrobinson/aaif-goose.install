@@ -188,7 +188,7 @@ jobs:
            $IconDir  = "${{ github.workspace }}\installer\icons"
            $ConfigDir  = "${{ github.workspace }}\installer\config"
            $BitmapDir  = "${{ github.workspace }}\installer\bitmaps"
-           $LicenseFile  = "${{ github.workspace }}\License.rtf"
+           $LicenseFile  = "${{ github.workspace }}\installer\License.rtf"
 
            
            $Outfile  = "GooseDesktop-superuser-{0}.msi" -f $ShortVer
@@ -224,7 +224,7 @@ jobs:
            $IconDir  = "${{ github.workspace }}\installer\icons"
            $ConfigDir  = "${{ github.workspace }}\installer\config"
            $BitmapDir  = "${{ github.workspace }}\installer\bitmaps"
-           $LicenseFile  = "${{ github.workspace }}\License.rtf"
+           $LicenseFile  = "${{ github.workspace }}\installer\License.rtf"
 
            
            $Outfile  = "GooseDesktop-enduser-{0}.msi" -f $ShortVer

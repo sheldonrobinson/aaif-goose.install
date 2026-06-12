@@ -334,13 +334,17 @@ jobs:
 
     steps:
       # ── 1. Download MSIs from Job 1 ───────────────────────
-      - name: Download MSI artifacts
+      - name: Download per-Machine MSI artifacts
         uses: actions/download-artifact@v4
         with:
           name: msi-packages
-          path: |
-            ${{ github.workspace }}/msi-output/machine/GooseDesktop-superuser-*.msi
-            ${{ github.workspace }}/smsi-output/user/GooseDesktop-enduser-*.msi            
+          path: ${{ github.workspace }}/msi-output/machine/
+
+      - name: Download per-User MSI artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: msi-packages
+          path: ${{ github.workspace }}/msi-output/user/   
 
       - name: List downloaded files
         run: find "$(pwd)" -type f -name "*.msi"

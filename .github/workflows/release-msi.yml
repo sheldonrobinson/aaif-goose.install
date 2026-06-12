@@ -188,6 +188,8 @@ jobs:
            $ProductWxs  = "${{ github.workspace }}\installer\Product.wxs"
            $IconDir  = "${{ github.workspace }}\installer\icons"
            $ConfigDir  = "${{ github.workspace }}\installer\config"
+           $BitmapDir  = "${{ github.workspace }}\installer\bitmaps"
+           $LicenseFile  = "${{ github.workspace }}\License.rtf"
 
            
            $Outfile  = "GooseDesktop-superuser-{0}.msi" -f $ShortVer
@@ -206,8 +208,8 @@ jobs:
            Write-Host "Building  $OutputMsi"
            wix build -arch "x64" -outputtype "Package" -culture "en-US" -b $SourceDir -out $OutputMsi `
             -intermediatefolder $BuildDir -src $ProductWxs -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext `
-            -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d Scope=$Scope `
-            -d SourceDir=$SourceDir -d IconDir=$IconDir -d ConfigDir=$ConfigDir
+            --d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d Scope=$Scope `
+              -d SourceDir=$SourceDir -d IconDir=$IconDir -d ConfigDir=$ConfigDir -d BitmapDir=$BitmapDir -d LicenseFile=$LicenseFile
            
            Write-Host "[ok]  Completed   $OutputMsi"
            
@@ -220,6 +222,10 @@ jobs:
            $SourceDir  = "${{ github.workspace }}\goose-bin"
            $OutputDir  = "${{ github.workspace }}\msi-output\user"
            $ProductWxs  = "${{ github.workspace }}\installer\Product.wxs"
+           $IconDir  = "${{ github.workspace }}\installer\icons"
+           $ConfigDir  = "${{ github.workspace }}\installer\config"
+           $BitmapDir  = "${{ github.workspace }}\installer\bitmaps"
+           $LicenseFile  = "${{ github.workspace }}\License.rtf"
 
            
            $Outfile  = "GooseDesktop-enduser-{0}.msi" -f $ShortVer
@@ -238,7 +244,8 @@ jobs:
            Write-Host "Building  $OutputMsi"
            wix build -arch "x64" -outputtype "Package" -culture "en-US" -b $SourceDir -out $OutputMsi `
             -intermediatefolder $BuildDir -src $ProductWxs -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext `
-            -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d SourceDir=$SourceDir -d Scope=$Scope 
+            -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d Scope=$Scope `
+            -d SourceDir=$SourceDir -d IconDir=$IconDir -d ConfigDir=$ConfigDir -d BitmapDir=$BitmapDir -d LicenseFile=$LicenseFile
           
            Write-Host "[ok]  Completed   $OutputMsi"
 

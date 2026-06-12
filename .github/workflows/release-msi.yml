@@ -334,12 +334,23 @@ jobs:
 
     steps:
       # ── 1. Download MSIs from Job 1 ───────────────────────
+      - name: List all artifacts
+        run: gh run artifacts --repo ${{ github.repository }} --run-id ${{ github.run_id }} 
+        
+      - name: Download ALL artifacts for debugging
+        uses: actions/download-artifact@v4
+        with:
+          path: debug-artifacts
+      - name: Inspect debug artifacts
+        run: find debug-artifacts -type f -maxdepth 4
+
+          
       - name: Download per-Machine MSI artifacts
         uses: actions/download-artifact@v4
         with:
           name: msi-packages
           path: msi-output/
-
+          
       - name: List downloaded files
         run: find "$(pwd)" -type f -name "*.msi"
 

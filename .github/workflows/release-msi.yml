@@ -26,12 +26,11 @@
 # ============================================================
 
 name: Build & Release MSI
-
 on:
+  workflow_dispatch: # Enable manual triggering
   push:
     tags:
       - "v*"
-  workflow_dispatch:
 
 concurrency:
   group: release-${{ github.ref }}

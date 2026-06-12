@@ -340,13 +340,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: msi-packages
-          path: ${{ github.workspace }}/msi-output/machine/
-
-      - name: Download per-User MSI artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: msi-packages
-          path: ${{ github.workspace }}/msi-output/user/   
+          path: ${{ github.workspace }}/msi-output/
 
       - name: List downloaded files
         run: find "$(pwd)" -type f -name "*.msi"

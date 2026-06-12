@@ -73,11 +73,11 @@
 		<!-- Use ui:WixUI instead of UIRef -->
 		<ui:WixUI Id="WixUI_Minimal"/>
 		<WixVariable Id="WixUILicenseRtf"
-		             Value="License.rtf"/>
+		             Value="$(LicenseFile)"/>
 		<WixVariable Id="WixUIBannerBmp"
-		             Value="bitmaps\banner.bmp"/>
+		             Value="$(BitmapDir)\banner.bmp"/>
 		<WixVariable Id="WixUIDialogBmp"
-		             Value="bitmaps\dialog.bmp"/>
+		             Value="$(BitmapDir)\dialog.bmp"/>
 	</Package>
 	<Fragment>
 			   <?if $(var.BuildType) = "Machine" ?>
@@ -226,9 +226,7 @@
 				<util:InternetShortcut Id="GooseDocsStartMenuShortcut"
 				                       Name="Goose Docs"
 				                       Target="https://goose-docs.ai/docs/"
-				                       Type="url"
-									   IconFile="icons\help.ico"
-									   IconIndex="0"/>
+				                       Type="url" />
 				<Shortcut Id="GooseUninstallShortcut"
 				          Name="Uninstall Goose Desktop"
 				          Description="Remove Goose Desktop from this computer"

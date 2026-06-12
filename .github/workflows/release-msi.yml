@@ -87,8 +87,6 @@ jobs:
           "version=$full"        | Out-File $env:GITHUB_OUTPUT -Append
           "short-version=$short" | Out-File $env:GITHUB_OUTPUT -Append
 
-          # Keep version.txt in sync (build.ps1 reads it as fallback)
-          Set-Content -Path installer/version.txt -Value $full -NoNewline
 
       # ── 3. Install dotnet ───────────────────────
       - name: Install dotnet
@@ -184,6 +182,7 @@ jobs:
         shell: pwsh
         run: |
            $ShortVer  = "${{ steps.get-version.outputs.short-version }}"
+           $ProductVersion  = "${{ steps.get-version.outputs.version }}"
            $SourceDir  = "${{ github.workspace }}\goose-bin"
            $OutputDir  = "${{ github.workspace }}\msi-output\machine"
            $ProductWxs  = "${{ github.workspace }}\installer\Product.wxs"

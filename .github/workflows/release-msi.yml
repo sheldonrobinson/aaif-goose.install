@@ -67,11 +67,13 @@ jobs:
         id: get-version
         shell: pwsh
         run: |
-          # Prefer the push-event tag; fall back to workflow_dispatch input
-          $vFile   = Join-Path "${{ github.workspace }}" "installer" "version.txt"   
-       
-       
-          $rawTag = if (Test-Path $vFile) { (Get-Content $vFile -Raw).Trim() } else { "1.0.0.0" }
+          # Prefer the push-event tag; fall back to version.txt
+          $vFile   = Join-Path "${{ github.workspace }}" "installer" "version.txt" 
+          $rawTag = if ("${{ github.ref_name }}" -ne "") {
+                      "${{ github.ref_name }}"
+                    } elseif (Test-Path $vFile) {
+                      (Get-Content $vFile -Raw).Trim()
+                    } else { "1.0.0.0" }
 
           $ver   = $rawTag.TrimStart('v')
           $parts = $ver -split '\.'
@@ -412,7 +414,7 @@ jobs:
           # Tags with a hyphen (v1.0.0-rc1, v2.0.0-beta) become pre-releases
           prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
-            msi-output/machine/*.msi
-            msi-output/user/*.msi
+            msi-output/machine/GooseDesktop-superuser-${{ needs.build-msi.outputs.short-version }}.msi
+            msi-output/user/GooseDesktop-enduser-${{ needs.build-msi.outputs.short-version }}.msi
           token: ${{ secrets.RELEASE_TOKEN }}
           fail_on_unmatched_files: true

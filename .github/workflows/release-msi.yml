@@ -339,8 +339,8 @@ jobs:
         with:
           name: msi-packages
           path: |
-            msi-output/machine/GooseDesktop-superuser-*.msi
-            msi-output/user/GooseDesktop-enduser-*.msi            
+            ${{ github.workspace }}/msi-output/machine/GooseDesktop-superuser-*.msi
+            ${{ github.workspace }}/smsi-output/user/GooseDesktop-enduser-*.msi            
 
       - name: List downloaded files
         run: find "$(pwd)" -type f -name "*.msi"

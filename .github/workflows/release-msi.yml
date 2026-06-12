@@ -69,7 +69,7 @@ jobs:
         run: |
           # Prefer the push-event tag; fall back to version.txt
           $vFile   = Join-Path "${{ github.workspace }}" "installer" "version.txt" 
-          $rawTag = if ("${{ github.ref_name }}" -ne "") {
+          $rawTag = if (("${{ github.ref_name }}" -ne "") -and (${{ github.ref }} -like "refs/tags/*")) {
                       "${{ github.ref_name }}"
                     } elseif (Test-Path $vFile) {
                       (Get-Content $vFile -Raw).Trim()

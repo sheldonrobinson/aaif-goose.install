@@ -11,6 +11,8 @@
 		<!-- Machine | User -->
 		<!-- Binary root -->
 		<SourceDir>..\bin\Release</SourceDir>
+        <IconDir>icons</IconDir>
+        <ConfigDir>config</ConfigDir>
 	</PropertyGroup>
 	<!-- GLOBAL preprocessor constants (apply to ALL .wxs files) -->
 	<PropertyGroup Label="Globals">
@@ -19,6 +21,8 @@
 				BuildType=$(BuildType);
 				ProductVersion=$(ProductVersion);
 				SourceDir=$(SourceDir);
+                IconDir=$(IconDir);
+                ConfigDir=$(ConfigDir);
 			</DefineConstants>
 	</PropertyGroup>
 	<!-- WiX extensions -->

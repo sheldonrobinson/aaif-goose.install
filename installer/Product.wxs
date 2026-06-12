@@ -143,21 +143,21 @@
 	<!-- ARP icon -->
 	<Fragment>
 		<Icon Id="GooseIcon"
-		      SourceFile="icons\goose.ico"/>
+		      SourceFile="$(IconDir)\goose.ico"/>
 		<Icon Id="HelpIcon"
-		      SourceFile="icons\help.ico"/>
+		      SourceFile="$(IconDir)\help.ico"/>
 		<Icon Id="InfoIcon"
-		      SourceFile="icons\info.ico"/>
+		      SourceFile="$(IconDir)\info.ico"/>
 		<Icon Id="StartIcon"
-		      SourceFile="icons\start.ico"/>
+		      SourceFile="$(IconDir)\start.ico"/>
 		<Icon Id="StopIcon"
-		      SourceFile="icons\stop.ico"/>
+		      SourceFile="$(IconDir)\stop.ico"/>
 		<Icon Id="SysCtlIcon"
-		      SourceFile="icons\sysctl.ico"/>
+		      SourceFile="$(IconDir)\sysctl.ico"/>
 		<Icon Id="UninstallIcon"
-		      SourceFile="icons\uninstall.ico"/>
+		      SourceFile="$(IconDir)\uninstall.ico"/>
 		<Icon Id="UserIcon"
-		      SourceFile="icons\user.ico"/>
+		      SourceFile="$(IconDir)\user.ico"/>
 	</Fragment>
 	<!-- ================================================================
        Directory tree  (structure defined in Directory.wxi)
@@ -274,7 +274,7 @@
 			           NeverOverwrite="yes">
 				<File Id="GooseConfigYaml"
 				      Name="config.yaml"
-				      Source="config\config.yaml"
+				      Source="$(ConfigDir)\config.yaml"
 				      KeyPath="yes"/>
 				<!-- Remove the Block\goose\config folder on uninstall if it is empty -->
 				<RemoveFolder Id="RemoveAppDataGooseConfig"

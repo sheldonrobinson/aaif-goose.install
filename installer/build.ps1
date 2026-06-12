@@ -213,11 +213,15 @@ function Invoke-WixBuild {
 	Write-Host "[dotnet] Compiling $(Split-Path $WixProject -Leaf) ..." -ForegroundColor DarkCyan
 
 	$ProductWxs 	= Join-Path $ScriptRoot "Product.wxs"
+    
+    $IconDir 	= Join-Path $ScriptRoot "icons"
+    $ConfigDir 	= Join-Path $ScriptRoot "config"
 	
 	Write-Host "[wix] Compiling $(Split-Path $ProductWxs -Leaf) ..." -ForegroundColor DarkCyan
 	wix build -arch "x64" -outputtype "Package" -culture "en-US" -b $SourceDir -out $OutputMsi `
 			  -intermediatefolder $BuildDir -src $ProductWxs -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext `
-			  -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d SourceDir=$SourceDir -d Scope=$Scope 
+			  -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d Scope=$Scope `
+              -d SourceDir=$SourceDir -d IconDir=$IconDir -d ConfigDir=$ConfigDir
 
     Write-Host "[ok]     $OutputMsi" -ForegroundColor Green
     return $OutputMsi

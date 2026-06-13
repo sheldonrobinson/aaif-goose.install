@@ -333,7 +333,12 @@ jobs:
     needs: build-msi
 
     steps:
-      # ── 1. Download MSIs from Job 1 ───────────────────────        
+      # ── 1. Checkout for git log ───────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # ── 2. Download MSIs from Job 1 ───────────────────────    
       - name: Download MSI artifacts
         uses: actions/download-artifact@v4
         with:
@@ -345,12 +350,6 @@ jobs:
           
       - name: List downloaded files
         run: find "$(pwd)" -type f -name "*.msi"
-
-      # ── 2. Checkout for git log ───────────────────────────
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       # ── 3. Auto-generate release notes from git log ───────
       - name: Generate release notes

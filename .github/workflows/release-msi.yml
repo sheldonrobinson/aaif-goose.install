@@ -398,8 +398,6 @@ jobs:
           EOF
 
       # ── 4. Publish release + upload MSIs ──────────────────
-      - name: DEBUG show working directory
-        run: pwd && ls -R ..
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:

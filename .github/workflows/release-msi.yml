@@ -334,20 +334,23 @@ jobs:
 
     steps:
       # ── 1. Download MSIs from Job 1 ───────────────────────
-      - name: List artifacts for this run
+      - name: List artifacts via REST API
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh run view ${{ github.run_id }} --json artifacts --repo ${{ github.repository }}
-        
+        run: |
+          curl -s \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts \
+            | jq .
       - name: Download ALL artifacts for debugging
         uses: actions/download-artifact@v4
         with:
           path: debug-artifacts
       - name: Inspect debug artifacts
         run: find debug-artifacts -type f -maxdepth 4
-
           
-      - name: Download per-Machine MSI artifacts
+      - name: Download MSI artifacts
         uses: actions/download-artifact@v4
         with:
           name: msi-packages

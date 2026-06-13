@@ -15,10 +15,6 @@
     Path to the folder containing Goose.exe.
     Defaults to ..\src\bin\Release relative to the installer folder.
 
-.PARAMETER WixTargetsPath
-    MSBuild will look for Wix.targets, WixTargetsPath property specifies the path to that file.
-    Defaults to $(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets
-
 .PARAMETER OutputDir
     Where to place the finished .msi files.
     Defaults to .\output relative to the installer folder.
@@ -49,11 +45,11 @@ param(
     [ValidateSet("machine","user","both")]
     [string]$Variant      = "both",
 
+    [string]$ScriptDir    = $PSScriptRoot,
     [string]$SourceDir    = (Join-Path $PSScriptRoot "..\src\bin\Release"),
     [string]$OutputDir    = (Join-Path $PSScriptRoot "output"),
-    [string]$WixTargetsPath       = "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\WixToolset\5.0\Imports\WixToolset.targets",
 
-    [switch]$Sign,
+	[switch]$Sign,
     [string]$CertThumbprint = "",
     [string]$TimestampUrl   = "http://timestamp.digicert.com"
 )
@@ -68,8 +64,7 @@ $ErrorActionPreference = "Stop"
 
 $null = New-Item -ItemType Directory -Force -Path $OutputDir
 
-$srcDir  = $PSScriptRoot
-$iconDir = Join-Path $PSScriptRoot "icons"
+$iconDir = Join-Path $ScriptRoot "icons"
 
 # ---------------------------------------------------------------------------
 # Determine product version
@@ -78,7 +73,7 @@ $iconDir = Join-Path $PSScriptRoot "icons"
 # ---------------------------------------------------------------------------
 $gooseExe = Join-Path $SourceDir "Goose.exe"
 
-$vFile   = Join-Path $PSScriptRoot "version.txt"
+$vFile   = Join-Path $ScriptDir "version.txt"
 $version = if (Test-Path $vFile) { (Get-Content $vFile -Raw).Trim() } else { "1.0.0.0" }
 Write-Warning "Goose.exe not found in SourceDir – using version $version from version.txt."
 
@@ -88,13 +83,15 @@ $shortVer = ($version -split '\.')[ 0..2 ] -join '.'
 
 $ghRepo      = "aaif-goose/goose"
 $downloadUrl = "https://github.com/{0}/releases/download/v{1}/Goose-win32-x64.zip" -f $ghRepo, $shortVer # URL of the ZIP file
-$stagingDir  = (Join-Path $PSScriptRoot "..\staging")					# Temporary staging folder
+$stagingDir  = (Join-Path $ScriptDir "staging")					# Temporary staging folder
 
 Write-Host ""
 Write-Host "=======================================" -ForegroundColor Cyan
 Write-Host "  AIFF Goose MSI Builder" -ForegroundColor Cyan
 Write-Host "  Version     : $version" -ForegroundColor Cyan
 Write-Host "  Variant     : $Variant" -ForegroundColor Cyan
+Write-Host "  PSScriptRoot:  $PSScriptRoot" -ForegroundColor Cyan
+Write-Host "  ScriptDir   : $ScriptDir" -ForegroundColor Cyan
 Write-Host "  SourceDir   : $SourceDir" -ForegroundColor Cyan
 Write-Host "  downloadUrl : $downloadUrl" -ForegroundColor Cyan
 Write-Host "  stagingDir  : $stagingDir" -ForegroundColor Cyan
@@ -215,12 +212,18 @@ function Invoke-WixBuild {
 	
 	Write-Host "[dotnet] Compiling $(Split-Path $WixProject -Leaf) ..." -ForegroundColor DarkCyan
 
-	$ProductWxs 	= Join-Path $PSScriptRoot "Product.wxs"
+	$ProductWxs 	= Join-Path $ScriptRoot "Product.wxs"
+    
+    $IconDir 	= Join-Path $ScriptRoot "icons"
+    $ConfigDir 	= Join-Path $ScriptRoot "config"
+    $BitmapDir 	= Join-Path $ScriptRoot "bitmaps"
+    $LicenseFile 	= Join-Path $ScriptRoot "License.rtf"
 	
 	Write-Host "[wix] Compiling $(Split-Path $ProductWxs -Leaf) ..." -ForegroundColor DarkCyan
 	wix build -arch "x64" -outputtype "Package" -culture "en-US" -b $SourceDir -out $OutputMsi `
 			  -intermediatefolder $BuildDir -src $ProductWxs -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext `
-			  -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d SourceDir=$SourceDir -d Scope=$Scope 
+			  -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d Scope=$Scope `
+              -d SourceDir=$SourceDir -d IconDir=$IconDir -d ConfigDir=$ConfigDir -d BitmapDir=$BitmapDir -d LicenseFile=$LicenseFile
 
     Write-Host "[ok]     $OutputMsi" -ForegroundColor Green
     return $OutputMsi
@@ -278,7 +281,7 @@ if ($Variant -in "machine","both") {
 	$prefix = "GooseDesktop-superuser"
 	$fileName = "{0}-{1}.msi" -f $prefix, $shortVer
     $msi = Join-Path $OutputFolder $fileName
-    Invoke-WixBuild -WixProject (Join-Path $srcDir "installer.wixproj") `
+    Invoke-WixBuild -WixProject (Join-Path $ScriptDir "installer.wixproj") `
 					-BuildType  "Machine" `
 					-prefix     $prefix `
 					-ProductVersion $version `
@@ -295,7 +298,7 @@ if ($Variant -in "user","both") {
 	$prefix = "GooseDesktop-enduser"
 	$fileName = "{0}-{1}.msi" -f $prefix, $shortVer
     $msi = Join-Path $OutputFolder $fileName
-    Invoke-WixBuild -WixProject (Join-Path $srcDir "installer.wixproj") `
+    Invoke-WixBuild -WixProject (Join-Path $ScriptDir "installer.wixproj") `
 					-BuildType  "User" `
 					-prefix     $prefix `
 					-ProductVersion $version `

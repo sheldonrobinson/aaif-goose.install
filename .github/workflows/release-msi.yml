@@ -15,9 +15,6 @@
 #
 #  Required secrets (Settings → Secrets → Actions):
 #    RELEASE_TOKEN        – fine-grained PAT with Contents: write
-#    GOOSE_ZIP_URL        – direct download URL for the pre-built ZIP
-#                          (use a secret if the URL is private/authenticated,
-#                           or hard-code it in env: below if it is public)
 #
 #  Optional signing secrets:
 #    CODESIGN_CERT_BASE64 – PFX certificate encoded as base64
@@ -26,17 +23,14 @@
 #
 #  env vars you may want to tweak:
 #    SIGN_MSI             – set to 'true' to enable signtool signing
-#    GOOSE_EXE_SUBPATH    – path inside the ZIP to Goose.exe
-#                          e.g. "bin/Goose.exe" or just "Goose.exe"
 # ============================================================
 
 name: Build & Release MSI
-
 on:
+  workflow_dispatch: # Enable manual triggering
   push:
     tags:
       - "v*"
-  workflow_dispatch:
 
 concurrency:
   group: release-${{ github.ref }}
@@ -44,8 +38,6 @@ concurrency:
 
 env:
   SIGN_MSI:          "false"      # flip to 'true' + add cert secrets to sign
-  GOOSE_EXE_SUBPATH: "Goose.exe" # path inside the ZIP; use subdir if needed
-                                  # e.g. "bin/Goose.exe"
 
 permissions:
   contents: write
@@ -69,19 +61,19 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.RELEASE_TOKEN }}
-
       # ── 2. Resolve tag + derive version numbers ───────────
       #       Tag v1.2.3  →  version: 1.2.3.0 | short: 1.2.3
-      - name: Derive version from tag
+      - name: Get version from version
         id: get-version
         shell: pwsh
         run: |
-          # Prefer the push-event tag; fall back to workflow_dispatch input
-          $rawTag = if ("${{ github.ref_name }}" -ne "") {
+          # Prefer the push-event tag; fall back to version.txt
+          $vFile   = Join-Path "${{ github.workspace }}" "installer" "version.txt" 
+          $rawTag = if (("${{ github.ref_name }}" -ne "") -and ("${{ github.ref }}" -like "refs/tags/*")) {
                       "${{ github.ref_name }}"
-                    } else {
-                      "${{ github.event.inputs.tag_name }}"
-                    }
+                    } elseif (Test-Path $vFile) {
+                      (Get-Content $vFile -Raw).Trim()
+                    } else { "1.0.0.0" }
 
           $ver   = $rawTag.TrimStart('v')
           $parts = $ver -split '\.'
@@ -97,111 +89,174 @@ jobs:
           "version=$full"        | Out-File $env:GITHUB_OUTPUT -Append
           "short-version=$short" | Out-File $env:GITHUB_OUTPUT -Append
 
-          # Keep version.txt in sync (build.ps1 reads it as fallback)
-          Set-Content -Path installer/version.txt -Value $full -NoNewline
 
-      # ── 3. Resolve ZIP download URL ───────────────────────
-      #       Priority: workflow_dispatch input > GOOSE_ZIP_URL secret
-      - name: Resolve ZIP URL
-        id: zip-url
+      # ── 3. Install dotnet ───────────────────────
+      - name: Install dotnet
         shell: pwsh
         run: |
-          $url = if ("${{ github.event.inputs.zip_url }}" -ne "") {
-                   "${{ github.event.inputs.zip_url }}"
-                 } else {
-                   "${{ secrets.GOOSE_ZIP_URL }}"
-                 }
-          if ([string]::IsNullOrWhiteSpace($url)) {
-            throw "No ZIP URL provided. Set the GOOSE_ZIP_URL secret or pass zip_url via workflow_dispatch."
-          }
-          Write-Host "ZIP URL: $url"
-          "url=$url" | Out-File $env:GITHUB_OUTPUT -Append
+            choco install dotnet-sdk --version 9.0.314 --yes --no-progress
 
-      # ── 4. Download pre-built ZIP ──────────────────────────
-      - name: Download Goose ZIP
+      # ── 4. Install WiX Toolset and Accept Eula ───────────────────────
+      - name: Install wix
+        run: |
+            dotnet tool install --global wix --version 5.0.2
+            wix extension add -g WixToolset.Util.wixext/5.0.2
+            wix extension add -g WixToolset.UI.wixext/5.0.2
+            
+      # ── 4. Download and Extract ──────────────────────────
+      - name: Download GooseDesktop zip
         shell: pwsh
         run: |
-          $url  = "${{ steps.zip-url.outputs.url }}"
-          $dest = "${{ github.workspace }}\goose-prebuilt.zip"
+          $sv  = "${{ steps.get-version.outputs.short-version }}"
+          $stagingDir  = "${{ github.workspace }}\staging"
+          $targetFolder  = "${{ github.workspace }}\goose-bin"
 
-          Write-Host "Downloading from: $url"
-          Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing
+         
+          $downloadUrl = "https://github.com/aaif-goose/goose/releases/download/v{0}/Goose-win32-x64.zip" -f $sv
+          $subfolderName = "dist-windows"
+          
+          # clean staging
+          if (Test-Path $stagingDir) { Remove-Item "$stagingDir\*" -Recurse -Force }
+          
+          # Ensure staging directory exists
+          New-Item -Path $stagingDir -ItemType Directory -Force | Out-Null
+          
+          # Download ZIP
+          $zipFilePath = Join-Path $stagingDir "download.zip"
 
-          if (-not (Test-Path $dest)) {
-            throw "Download failed – file not found at $dest"
+          Write-Host "Downloading from: $downloadUrl"
+          Invoke-WebRequest -Uri $downloadUrl -OutFile $zipFilePath -UseBasicParsing
+
+          if (-not (Test-Path $zipFilePath)) {
+            throw "Download failed – file not found at $zipFilePath"
           }
-          $size = (Get-Item $dest).Length
+          $size = (Get-Item $zipFilePath).Length
           Write-Host "Downloaded: $([math]::Round($size/1KB, 1)) KB"
 
-      # ── 5. Extract Goose.exe from ZIP ─────────────────────
-      - name: Extract Goose.exe
-        shell: pwsh
-        run: |
-          $zip      = "${{ github.workspace }}\goose-prebuilt.zip"
-          $out      = "${{ github.workspace }}\goose-extracted"
-          $staging  = "${{ github.workspace }}\goose-bin"
-          $subpath  = "$env:GOOSE_EXE_SUBPATH"
+          # Load .NET ZipArchive
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($zipFilePath)
 
-          # Extract entire ZIP first
-          Expand-Archive -Path $zip -DestinationPath $out -Force
+          # Filter entries for the desired subfolder
+          $entries = $zip.Entries | Where-Object { $_.FullName -like "$subfolderName/*" }
 
-          # Find Goose.exe – honour GOOSE_EXE_SUBPATH if set, else search
-          $exeSrc = $null
-          if ($subpath -ne "Goose.exe" -and $subpath -ne "") {
-            $candidate = Join-Path $out $subpath
-            if (Test-Path $candidate) { $exeSrc = $candidate }
-          }
-          if (-not $exeSrc) {
-            # Auto-locate anywhere in the extracted tree
-            $exeSrc = Get-ChildItem -Path $out -Recurse -Filter "Goose.exe" |
-                      Select-Object -First 1 -ExpandProperty FullName
-          }
-          if (-not $exeSrc) {
-            Write-Host "Contents of ZIP:"
-            Get-ChildItem -Path $out -Recurse | Select-Object -ExpandProperty FullName
-            throw "Goose.exe not found inside the ZIP. Check GOOSE_EXE_SUBPATH."
+          if (-not $entries) {
+            $zip.Dispose()
+            throw "Subfolder '$subfolderName' not found in ZIP."
           }
 
-          Write-Host "Found Goose.exe at: $exeSrc"
+          # clean staging
+          if (Test-Path $targetFolder) { Remove-Item "$targetFolder\*" -Recurse -Force }
+          
+          # Ensure target folder exists
+          New-Item -Path $targetFolder -ItemType Directory -Force | Out-Null
 
-          # Copy into a clean staging folder (build.ps1 -SourceDir points here)
-          $null = New-Item -ItemType Directory -Force -Path $staging
-          Copy-Item -Path $exeSrc -Destination (Join-Path $staging "Goose.exe")
-          Write-Host "Staged:  $staging\Goose.exe"
+          Write-Host "Extracting subfolder '$subfolderName' to $targetFolder ..."
+          foreach ($entry in $entries) {
+            if (-not $entry.FullName.EndsWith("/")) {
+                # Compute relative path inside subfolder
+                $relativePath = $entry.FullName.Substring($subfolderName.Length + 1)
+                $destinationPath = Join-Path $targetFolder $relativePath
+                
+                # Ensure parent directory exists
+                $parentDir = Split-Path $destinationPath
+                if (-not (Test-Path $parentDir)) {
+                    New-Item -Path $parentDir -ItemType Directory -Force | Out-Null
+                }
 
-          # Log the file version embedded in the binary
-          $fv = (Get-Item (Join-Path $staging "Goose.exe")).VersionInfo
-          Write-Host "FileVersion in binary: $($fv.FileVersion)"
-
-      # ── 6. Install WiX Toolset 3.11 ───────────────────────
-      - name: Install WiX Toolset 3.11
-        shell: pwsh
-        run: choco install wixtoolset --version 3.11.2 --yes --no-progress
-
-      # ── 7. Build per-machine MSI ──────────────────────────
-      - name: Build per-machine MSI
+                # Extract file
+                $entryStream = $entry.Open()
+                $fileStream = [System.IO.File]::Create($destinationPath)
+                $entryStream.CopyTo($fileStream)
+                $fileStream.Close()
+                $entryStream.Close()
+            }
+          }
+          
+          $zip.Dispose()
+          Write-Host "Extraction complete."
+        
+          Write-Host "Extracted to:  $targetFolder"
+      
+      # ── 5. Build per-Machine MSI ──────────────────────────
+      - name: Build per-Machine MSI
         shell: pwsh
         run: |
-          .\installer\build.ps1 `
-            -Variant  machine `
-            -SourceDir "${{ github.workspace }}\goose-bin" `
-            -OutputDir "${{ github.workspace }}\msi-output"
+           $ShortVer  = "${{ steps.get-version.outputs.short-version }}"
+           $ProductVersion  = "${{ steps.get-version.outputs.version }}"
+           $SourceDir  = "${{ github.workspace }}\goose-bin"
+           $OutputDir  = "${{ github.workspace }}\msi-output\machine"
+           $ProductWxs  = "${{ github.workspace }}\installer\Product.wxs"
+           $IconDir  = "${{ github.workspace }}\installer\icons"
+           $ConfigDir  = "${{ github.workspace }}\installer\config"
+           $BitmapDir  = "${{ github.workspace }}\installer\bitmaps"
+           $LicenseFile  = "${{ github.workspace }}\installer\License.rtf"
 
-      # ── 8. Build per-user MSI ─────────────────────────────
-      - name: Build per-user MSI
+           
+           $Outfile  = "GooseDesktop-superuser-{0}.msi" -f $ShortVer
+           $OutputMsi = Join-Path $OutputDir  $Outfile
+           $BuildType = "Machine"
+           $Scope = "perMachine"
+           # Ensure staging directory exists  (clean if exists)
+           if (Test-Path $OutputDir) { Remove-Item $OutputDir -Recurse -Force }
+           New-Item -Path $OutputDir -ItemType Directory -Force | Out-Null
+           
+           # Clean intermediate directory
+           $BuildDir = Join-Path $OutputDir "build"
+           if (Test-Path $BuildDir) { Remove-Item $BuildDir -Recurse -Force }
+           New-Item -Path $BuildDir -ItemType Directory -Force | Out-Null
+           
+           Write-Host "Building  $OutputMsi"
+           wix build -arch "x64" -outputtype "Package" -culture "en-US" -b $SourceDir -out $OutputMsi `
+            -intermediatefolder $BuildDir -src $ProductWxs -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext `
+            -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d Scope=$Scope `
+            -d SourceDir=$SourceDir -d IconDir=$IconDir -d ConfigDir=$ConfigDir -d BitmapDir=$BitmapDir -d LicenseFile=$LicenseFile
+           
+           Write-Host "[ok]  Completed   $OutputMsi"
+           
+      # ── 6. Build per-User MSI ──────────────────────────
+      - name: Build per-User MSI
         shell: pwsh
         run: |
-          .\installer\build.ps1 `
-            -Variant  user `
-            -SourceDir "${{ github.workspace }}\goose-bin" `
-            -OutputDir "${{ github.workspace }}\msi-output"
+           $ShortVer  = "${{ steps.get-version.outputs.short-version }}"
+           $ProductVersion  = "${{ steps.get-version.outputs.version }}"
+           $SourceDir  = "${{ github.workspace }}\goose-bin"
+           $OutputDir  = "${{ github.workspace }}\msi-output\user"
+           $ProductWxs  = "${{ github.workspace }}\installer\Product.wxs"
+           $IconDir  = "${{ github.workspace }}\installer\icons"
+           $ConfigDir  = "${{ github.workspace }}\installer\config"
+           $BitmapDir  = "${{ github.workspace }}\installer\bitmaps"
+           $LicenseFile  = "${{ github.workspace }}\installer\License.rtf"
 
-      # ── 9. List build output ──────────────────────────────
+           
+           $Outfile  = "GooseDesktop-enduser-{0}.msi" -f $ShortVer
+           $OutputMsi = Join-Path $OutputDir  $Outfile
+           $BuildType = "User"
+           $Scope = "perUser"
+           # Ensure staging directory exists  (clean if exists)
+           if (Test-Path $OutputDir) { Remove-Item $OutputDir -Recurse -Force }
+           New-Item -Path $OutputDir -ItemType Directory -Force | Out-Null
+           
+           # Clean intermediate directory
+           $BuildDir = Join-Path $OutputDir "build"
+           if (Test-Path $BuildDir) { Remove-Item $BuildDir -Recurse -Force }
+           New-Item -Path $BuildDir -ItemType Directory -Force | Out-Null
+           
+           Write-Host "Building  $OutputMsi"
+           wix build -arch "x64" -outputtype "Package" -culture "en-US" -b $SourceDir -out $OutputMsi `
+            -intermediatefolder $BuildDir -src $ProductWxs -ext WixToolset.Util.wixext -ext WixToolset.UI.wixext `
+            -d BuildType=$BuildType -d ProductVersion=$ProductVersion -d ShortVer=$ShortVer -d Scope=$Scope `
+            -d SourceDir=$SourceDir -d IconDir=$IconDir -d ConfigDir=$ConfigDir -d BitmapDir=$BitmapDir -d LicenseFile=$LicenseFile
+          
+           Write-Host "[ok]  Completed   $OutputMsi"
+
+
+      # ── 7. List build output ──────────────────────────────
       - name: List MSI output
         shell: pwsh
-        run: Get-ChildItem "${{ github.workspace }}\msi-output" | Format-Table Name, Length
+        run: Get-ChildItem "${{ github.workspace }}\msi-output\**\*.msi" | Format-Table Name, Length
 
-      # ── 10. (Optional) Import signing certificate ─────────
+      # ── 8. (Optional) Import signing certificate ─────────
       - name: Import code-signing certificate
         if: env.SIGN_MSI == 'true'
         shell: pwsh
@@ -216,15 +271,15 @@ jobs:
           Remove-Item $pfx -Force
           Write-Host "Certificate imported."
 
-      # ── 11. (Optional) Sign both MSIs ─────────────────────
+      # ── 9. (Optional) Sign both MSIs ─────────────────────
       - name: Sign MSIs
         if: env.SIGN_MSI == 'true'
         shell: pwsh
         run: |
           $sv  = "${{ steps.get-version.outputs.short-version }}"
           $msis = @(
-            "${{ github.workspace }}\msi-output\GooseSetup-$sv.msi",
-            "${{ github.workspace }}\msi-output\GooseSetup-$sv-peruser.msi"
+            "${{ github.workspace }}\msi-output\machine\GooseDesktop-superuser-$sv.msi",
+            "${{ github.workspace }}\msi-output\user\GooseDesktop-enduser-$sv.msi"
           )
           $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" `
             -Recurse -Filter signtool.exe |
@@ -240,7 +295,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw "Signing failed for $msi" }
           }
 
-      # ── 12. Commit updated version.txt back to main ───────
+      # ── 10. Commit updated version.txt back to main ───────
       - name: Commit version.txt
         shell: pwsh
         run: |
@@ -260,12 +315,12 @@ jobs:
             Write-Host "version.txt already at $full – nothing to commit."
           }
 
-      # ── 13. Upload MSIs as workflow artifacts ─────────────
+      # ── 11. Upload MSIs as workflow artifacts ─────────────
       - name: Upload MSI artifacts
         uses: actions/upload-artifact@v4
         with:
           name: msi-packages
-          path: msi-output/{User,Machine}/*.msi
+          path: msi-output/
           if-no-files-found: error
           retention-days: 7
 
@@ -278,21 +333,23 @@ jobs:
     needs: build-msi
 
     steps:
-      # ── 1. Download MSIs from Job 1 ───────────────────────
+      # ── 1. Checkout for git log ───────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # ── 2. Download MSIs from Job 1 ───────────────────────    
       - name: Download MSI artifacts
         uses: actions/download-artifact@v4
         with:
           name: msi-packages
           path: msi-output/
-
+          merge-multiple: true
+          repository: ${{ github.repository }}
+          run-id: ${{ github.run_id }}
+          
       - name: List downloaded files
         run: find "$(pwd)" -type f -name "*.msi"
-
-      # ── 2. Checkout for git log ───────────────────────────
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       # ── 3. Auto-generate release notes from git log ───────
       - name: Generate release notes
@@ -314,18 +371,18 @@ jobs:
           ### Downloads
           | Package | Scope |
           |---------|-------|
-          | \`GooseSetup-${VERSION}.msi\` | Per-machine – installs to \`Program Files\`, requires admin / UAC |
-          | \`GooseSetup-${VERSION}-peruser.msi\` | Per-user – installs to \`LocalAppData\`, no UAC needed |
+          | \`GooseDesktop-superuser-${VERSION}.msi\` | Per-machine – installs to \`Program Files\`, requires admin / UAC |
+          | \`GooseDesktop-enduser-${VERSION}.msi\` | Per-user – installs to \`LocalAppData\`, no UAC needed |
 
           ### Install
 
           **Silent / unattended (per-machine):**
           \`\`\`
-          msiexec /i GooseSetup-${VERSION}.msi /qn
+          msiexec /i GooseDesktop-superuser-${VERSION}.msi /qn
           \`\`\`
           **Silent / unattended (per-user):**
           \`\`\`
-          msiexec /i GooseSetup-${VERSION}-peruser.msi /qn
+          msiexec /i GooseDesktop-enduser-${VERSION}.msi /qn
           \`\`\`
           **Interactive:** double-click either MSI and follow the wizard.
 
@@ -350,7 +407,6 @@ jobs:
           draft:      false
           # Tags with a hyphen (v1.0.0-rc1, v2.0.0-beta) become pre-releases
           prerelease: ${{ contains(github.ref_name, '-') }}
-          files: |
-            msi-output/*.msi
+          files: msi-output/**/*.msi
           token: ${{ secrets.RELEASE_TOKEN }}
           fail_on_unmatched_files: true

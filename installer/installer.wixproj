@@ -11,6 +11,10 @@
 		<!-- Machine | User -->
 		<!-- Binary root -->
 		<SourceDir>..\bin\Release</SourceDir>
+        <IconDir>icons</IconDir>
+        <ConfigDir>config</ConfigDir>
+        <BitmapDir>License.rtf</BitmapDir>
+        <LicenseFile>License.rtf</LicenseFile>
 	</PropertyGroup>
 	<!-- GLOBAL preprocessor constants (apply to ALL .wxs files) -->
 	<PropertyGroup Label="Globals">
@@ -19,6 +23,10 @@
 				BuildType=$(BuildType);
 				ProductVersion=$(ProductVersion);
 				SourceDir=$(SourceDir);
+                IconDir=$(IconDir);
+                ConfigDir=$(ConfigDir);
+                BitmapDir=$(BitmapDir);
+                LicenseFile=$(LicenseFile);
 			</DefineConstants>
 	</PropertyGroup>
 	<!-- WiX extensions -->

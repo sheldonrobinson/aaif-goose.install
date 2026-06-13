@@ -334,8 +334,8 @@ jobs:
 
     steps:
       # ── 1. Download MSIs from Job 1 ───────────────────────
-      - name: List all artifacts
-        run: gh run artifacts --repo ${{ github.repository }}
+      - name: List artifacts for this run
+        run: gh run view ${{ github.run_id }} --json artifacts --repo ${{ github.repository }}
         
       - name: Download ALL artifacts for debugging
         uses: actions/download-artifact@v4

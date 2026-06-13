@@ -339,6 +339,7 @@ jobs:
         with:
           name: msi-packages
           path: msi-output/
+          merge-multiple: true
           
       - name: List downloaded files
         run: find "$(pwd)" -type f -name "*.msi"
@@ -396,6 +397,8 @@ jobs:
           EOF
 
       # ── 4. Publish release + upload MSIs ──────────────────
+      - name: Debug: show working directory
+        run: pwd && ls -R .
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -405,6 +408,6 @@ jobs:
           draft:      false
           # Tags with a hyphen (v1.0.0-rc1, v2.0.0-beta) become pre-releases
           prerelease: ${{ contains(github.ref_name, '-') }}
-          files: msi-output/msi-packages/**/*.msi
+          files: msi-output/**/*.msi
           token: ${{ secrets.RELEASE_TOKEN }}
           fail_on_unmatched_files: true

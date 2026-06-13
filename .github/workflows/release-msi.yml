@@ -333,28 +333,13 @@ jobs:
     needs: build-msi
 
     steps:
-      # ── 1. Download MSIs from Job 1 ───────────────────────
-      - name: List artifacts via REST API
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          curl -s \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts \
-            | jq .
-      - name: Download ALL artifacts for debugging
-        uses: actions/download-artifact@v4
-        with:
-          path: debug-artifacts
-      - name: Inspect debug artifacts
-        run: find debug-artifacts -type f -maxdepth 4
-          
+      # ── 1. Download MSIs from Job 1 ───────────────────────        
       - name: Download MSI artifacts
         uses: actions/download-artifact@v4
         with:
           name: msi-packages
           path: msi-output/
+          merge-multiple: true
           
       - name: List downloaded files
         run: find "$(pwd)" -type f -name "*.msi"
@@ -421,6 +406,6 @@ jobs:
           draft:      false
           # Tags with a hyphen (v1.0.0-rc1, v2.0.0-beta) become pre-releases
           prerelease: ${{ contains(github.ref_name, '-') }}
-          files: msi-output/**/*.msi
+          files: msi-output/*.msi
           token: ${{ secrets.RELEASE_TOKEN }}
           fail_on_unmatched_files: true

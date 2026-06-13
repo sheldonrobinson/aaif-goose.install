@@ -340,7 +340,6 @@ jobs:
           name: msi-packages
           path: msi-output/
           merge-multiple: true
-          merge-multiple: true
           repository: ${{ github.repository }}
           run-id: ${{ github.run_id }}
           

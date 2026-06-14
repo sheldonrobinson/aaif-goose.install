@@ -64,8 +64,6 @@ $ErrorActionPreference = "Stop"
 
 $null = New-Item -ItemType Directory -Force -Path $OutputDir
 
-$iconDir = Join-Path $ScriptRoot "icons"
-
 # ---------------------------------------------------------------------------
 # Determine product version
 #   1. Read FileVersion from Goose.exe   (preferred)
@@ -212,12 +210,12 @@ function Invoke-WixBuild {
 	
 	Write-Host "[dotnet] Compiling $(Split-Path $WixProject -Leaf) ..." -ForegroundColor DarkCyan
 
-	$ProductWxs 	= Join-Path $ScriptRoot "Product.wxs"
+	$ProductWxs 	= Join-Path $PSScriptRoot "Product.wxs"
     
-    $IconDir 	= Join-Path $ScriptRoot "icons"
-    $ConfigDir 	= Join-Path $ScriptRoot "config"
-    $BitmapDir 	= Join-Path $ScriptRoot "bitmaps"
-    $LicenseFile 	= Join-Path $ScriptRoot "License.rtf"
+    $IconDir 	= Join-Path $PSScriptRoot "icons"
+    $ConfigDir 	= Join-Path $PSScriptRoot "config"
+    $BitmapDir 	= Join-Path $PSScriptRoot "bitmaps"
+    $LicenseFile 	= Join-Path $PSScriptRoot "License.rtf"
 	
 	Write-Host "[wix] Compiling $(Split-Path $ProductWxs -Leaf) ..." -ForegroundColor DarkCyan
 	wix build -arch "x64" -outputtype "Package" -culture "en-US" -b $SourceDir -out $OutputMsi `

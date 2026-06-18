@@ -179,21 +179,6 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
-  gitmcp:
-    enabled: true
-    type: stdio
-    name: GitMCP
-    description: Gets latest documentation for any GitHub project
-    cmd: npx
-    args:
-    - -y
-    - mcp-remote
-    - https://gitmcp.io/docs
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
   goosedocs:
     enabled: false
     type: stdio
@@ -292,19 +277,6 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
-  rivalsearch:
-    enabled: true
-    type: streamable_http
-    name: Rival Search
-    description: Suite of tools for web retrieval, search, and content discovery
-    uri: https://RivalSearchMCP.fastmcp.app/mcp
-    envs: {}
-    env_keys: []
-    headers: {}
-    timeout: 300
-    socket: null
-    bundled: null
-    available_tools: []
   repomix:
     enabled: false
     type: stdio
@@ -396,6 +368,20 @@ extensions:
     cmd: uvx
     args:
     - beads-mcp
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  sequential_thinking:
+    enabled: false
+    type: stdio
+    name: Sequential Thinking
+    description: Provides a tool for dynamic and reflective problem-solving through a structured thinking process.
+    cmd: npx
+    args:
+    - -y
+    - '@modelcontextprotocol/server-sequential-thinking'
     envs: {}
     env_keys: []
     timeout: 300
@@ -579,32 +565,6 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
-  general:
-    enabled: false
-    type: streamable_http
-    name: General
-    description: 'General information and knowledge about the world, news, people, and events, '
-    uri: http://localhost:3000/mcp
-    envs: {}
-    env_keys: []
-    headers: {}
-    timeout: 300
-    socket: null
-    bundled: null
-    available_tools: []
-  publicinformationlookup:
-    enabled: false
-    type: streamable_http
-    name: Public Information Lookup
-    description: Assorted lookup services for information on location, weather, and other data
-    uri: http://localhost:3999/mcp
-    envs: {}
-    env_keys: []
-    headers: {}
-    timeout: 300
-    socket: null
-    bundled: null
-    available_tools: []
   git:
     enabled: true
     type: stdio
@@ -692,6 +652,19 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
+  supply-chain-agent:
+    enabled: false
+    type: stdio
+    name: Supply-Chain Agent
+    description: A lightweight MCP server providing structured access to logistics workflows—shipments, tracking, routing, and supply-chain operations—for AI agents and automation.
+    cmd: uvx
+    args:
+    - logistics_ai_mcp
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
   shadcn:
     enabled: false
     type: stdio
@@ -700,13 +673,28 @@ extensions:
     cmd: npx
     args:
     - -y
-    - shadcn@latest
+    - 'shadcn@latest'
     - mcp
     envs: {}
     env_keys: []
     timeout: 300
     bundled: null
     available_tools: []
+  open_websearch:
+    enabled: false
+    type: stdio
+    name: Open WebSearch
+    description: A Multi-engine MCP server, CLI, and local daemon, that can also be paired with skill-guided agent workflows for live web search and content retrieval.
+    cmd: npx
+    args:
+    - -y
+    - 'open-websearch@latest'
+    - mcp
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []  
 providers:
   openai:
     enabled: true

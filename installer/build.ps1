@@ -102,7 +102,6 @@ Write-Host ""
 # ---------------------------------------------------------------------------
 $defines = @(
     "-dSourceDir=$SourceDir"
-    "-dIconDir=$iconDir"
     "-dProductVersion=$version"
 )
 

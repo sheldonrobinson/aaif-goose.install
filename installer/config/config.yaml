@@ -415,22 +415,6 @@ extensions:
     socket: null
     bundled: null
     available_tools: []
-  openwebsearch:
-    enabled: true
-    type: stdio
-    name: Open WebSearch
-    description: A Multi-engine MCP server, CLI, and local daemon, that can also be paired with skill-guided agent workflows for live web search and content retrieval.
-    cmd: npx
-    args:
-    - -y
-    - open-websearch@latest
-    envs: {}
-    env_keys:
-    - ENABLE_CORS
-    - MODE
-    timeout: 300
-    bundled: null
-    available_tools: []
   containertracking:
     enabled: false
     type: streamable_http

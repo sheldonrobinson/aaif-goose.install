@@ -577,7 +577,7 @@ extensions:
     bundled: null
     available_tools: []
 providers:
-  custom_llama-server:
+  openai:
     enabled: true
     model: unsloth/gemma-4-26B-A4B-it-GGUF:UD-Q4_K_XL
     configured: true
@@ -587,7 +587,7 @@ voice_dictation_provider: local
 LOCAL_WHISPER_MODEL: base
 GOOSE_MODE: auto
 GOOSE_DISABLE_KEYRING: true
-active_provider: custom_llama-server
+active_provider: openai
 GOOSE_THINKING_EFFORT: medium
 OPENAI_BASE_URL: http://localhost:11434
 OPENAI_HOST: http://localhost:11434

@@ -292,36 +292,6 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
-  github:
-    enabled: true
-    type: streamable_http
-    name: github
-    description: GitHub Copilot MCP endpoint providing machine‑checkable protocol definitions and tooling for building MCP‑compatible agents and servers.
-    uri: https://api.githubcopilot.com/mcp/
-    envs: {}
-    env_keys:
-    - GITHUB_TOKEN
-    headers:
-      Authorization: Bearer ${GITHUB_TOKEN}
-    timeout: 300
-    socket: null
-    bundled: null
-    available_tools: []
-  tradingview:
-    enabled: false
-    type: stdio
-    name: tradingview
-    description: AI-powered trading toolkit for Claude and MCP clients. Backtesting + Live Sentiment + Yahoo Finance + 30+ Technical Analysis Tools — all in one MCP server.
-    cmd: uvx
-    args:
-    - --from
-    - tradingview-mcp-server
-    - tradingview-mcp
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
   tutorial:
     enabled: false
     type: builtin
@@ -330,21 +300,6 @@ extensions:
     display_name: Tutorial
     timeout: 300
     bundled: true
-    available_tools: []
-  context7:
-    enabled: false
-    type: stdio
-    name: Context7
-    description: Use up-to-date code and docs
-    cmd: npx
-    args:
-    - -y
-    - '@upstash/context7-mcp'
-    envs: {}
-    env_keys:
-    - CONTEXT7_API_KEY
-    timeout: 300
-    bundled: null
     available_tools: []
   prompts_chat:
     enabled: true
@@ -355,47 +310,6 @@ extensions:
     args:
     - -y
     - '@fkadev/prompts.chat-mcp@latest'
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  beads:
-    enabled: false
-    type: stdio
-    name: Beads
-    description: Git-backed issue tracker for AI agent task management
-    cmd: uvx
-    args:
-    - beads-mcp
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  sequential_thinking:
-    enabled: false
-    type: stdio
-    name: Sequential Thinking
-    description: Provides a tool for dynamic and reflective problem-solving through a structured thinking process.
-    cmd: npx
-    args:
-    - -y
-    - '@modelcontextprotocol/server-sequential-thinking'
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  nostrbook:
-    enabled: false
-    type: stdio
-    name: NostrBook
-    description: Nostr protocol integration for decentralized social
-    cmd: npx
-    args:
-    - -y
-    - '@nostrbook/mcp@latest'
     envs: {}
     env_keys: []
     timeout: 300
@@ -432,139 +346,6 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
-  emailserver:
-    enabled: false
-    type: stdio
-    name: Email Server
-    description: IMAP/SMTP email operations with Claude, Cursor, and other AI assistants
-    cmd: npx
-    args:
-    - -y
-    - mcp-mail-server
-    envs: {}
-    env_keys:
-    - IMAP_HOST
-    - IMAP_PORT
-    - IMAP_SECURE
-    - SMTP_HOST
-    - SMTP_PORT
-    - SMTP_SECURE
-    - EMAIL_USER
-    - EMAIL_PASS
-    timeout: 300
-    bundled: null
-    available_tools: []
-  blueskysocial:
-    enabled: false
-    type: stdio
-    name: Bluesky Social
-    description: A full‑featured Bluesky MCP server that adds search, feeds, trends, follower graph tools, thread retrieval, and rich content/engagement management for agentic workflows.
-    cmd: npx
-    args:
-    - -y
-    - '@semihberkay/bluesky-mcp'
-    envs: {}
-    env_keys:
-    - BLUESKY_IDENTIFIER
-    - BLUESKY_SERVICE_URL
-    - BLUESKY_APP_PASSWORD
-    timeout: 300
-    bundled: null
-    available_tools: []
-  mastodonsocial:
-    enabled: false
-    type: stdio
-    name: Mastodon Social
-    description: A minimal Mastodon MCP server providing basic posting, timeline access, and simple social interactions for agentic clients.
-    cmd: uvx
-    args:
-    - --from
-    - mastodon-mcp-server
-    - mastodon-mcp
-    envs: {}
-    env_keys:
-    - MASTODON_INSTANCE
-    - MASTODON_ACCESS_TOKEN
-    timeout: 300
-    bundled: null
-    available_tools: []
-  discord:
-    enabled: false
-    type: stdio
-    name: Discord
-    description: A minimal Discord MCP server that exposes basic message‑sending and channel‑interaction tools for agentic automation.
-    cmd: npx
-    args:
-    - -y
-    - '@pasympa/discord-mcp'
-    envs: {}
-    env_keys:
-    - DISCORD_TOKEN
-    timeout: 300
-    bundled: null
-    available_tools: []
-  reddit:
-    enabled: false
-    type: stdio
-    name: Reddit
-    description: A full‑featured Reddit MCP server that supports posting, commenting, subreddit browsing, inbox access, user history, voting, saving, subscribing, and search for agentic automation.
-    cmd: npx
-    args:
-    - -y
-    - reddit-mcp-buddy
-    envs: {}
-    env_keys:
-    - REDDIT_USERNAME
-    - REDDIT_PASSWORD
-    timeout: 300
-    bundled: null
-    available_tools: []
-  linkedinnewsletter:
-    enabled: false
-    type: stdio
-    name: LinkedIn Newsletter
-    description: A minimal LinkedIn MCP server that exposes basic profile lookup and posting capabilities for lightweight agent automation.
-    cmd: uvx
-    args:
-    - ldraney-linkedin-mcp
-    envs: {}
-    env_keys:
-    - LINKEDIN_PERSON_ID
-    - LINKEDIN_ACCESS_TOKEN
-    timeout: 300
-    bundled: null
-    available_tools: []
-  linkedin:
-    enabled: false
-    type: stdio
-    name: LinkedIn
-    description: A minimal LinkedIn MCP server that enables agents to authenticate, fetch profiles, and perform basic LinkedIn interactions programmatically.
-    cmd: uvx
-    args:
-    - linkedin-scraper-mcp@latest
-    - --transport
-    - stdio
-    envs: {}
-    env_keys:
-    - UV_HTTP_TIMEOUT
-    timeout: 300
-    bundled: null
-    available_tools: []
-  linkedinjobsandnetwork:
-    enabled: false
-    type: stdio
-    name: LinkedIn Jobs and Network
-    description: A lightweight MCP server that exposes LinkedIn search and profile‑scraping capabilities to agentic clients.
-    cmd: npx
-    args:
-    - -y
-    - '@pegasusheavy/linkedin-mcp'
-    envs: {}
-    env_keys:
-    - LINKEDIN_ACCESS_TOKEN
-    timeout: 300
-    bundled: null
-    available_tools: []
   git:
     enabled: true
     type: stdio
@@ -592,121 +373,222 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
-  judicialresearchagent:
-    enabled: false
+  sequential_thinking:
+    enabled: true
     type: stdio
-    name: Judicial Research Agent
-    description: An MCP server that lets AI agents search and retrieve 3M+ U.S. court decisions and EU legislation via CourtListener and EUR‑Lex for legal research.
-    cmd: uvx
-    args:
-    - --from
-    - legal-court-mcp-server
-    - legal-court-server
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  realestateassistant:
-    enabled: false
-    type: stdio
-    name: Real Estate Assistant
-    description: An MCP server that gives AI agents unified access to U.S. real‑estate data, including property records, valuations, and market insights for analysis and automation.
-    cmd: uvx
-    args:
-    - --from
-    - real-estate-data-mcp-server
-    - real-estate-server
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  jobmarketanalyst:
-    enabled: false
-    type: stdio
-    name: Job Market Analyst
-    description: An MCP server providing global labor‑market data, including unemployment rates, wages, sector employment, and occupation outlooks using official BLS (US) and Eurostat (EU) APIs.
-    cmd: uvx
-    args:
-    - --from
-    - labor-market-mcp-server
-    - labor-market-server
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  crossrefresearchassistant:
-    enabled: false
-    type: stdio
-    name: Crossref Research Assistant
-    description: An MCP server that lets AI agents query Crossref for academic metadata, including DOIs, authors, journals, citations, and publication records for research automation.
-    cmd: uvx
-    args:
-    - --from
-    - crossref-academic-mcp-server
-    - crossref-server
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  supply-chain-agent:
-    enabled: false
-    type: stdio
-    name: Supply-Chain Agent
-    description: A lightweight MCP server providing structured access to logistics workflows—shipments, tracking, routing, and supply-chain operations—for AI agents and automation.
-    cmd: uvx
-    args:
-    - logistics_ai_mcp
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  shadcn:
-    enabled: false
-    type: stdio
-    name: shadcn
-    description: A shadcn/ui–native MCP server enabling structured component metadata, actions, and UI-aware tooling for agent workflows.
+    name: sequential_thinking
+    description: Provides a tool for dynamic and reflective problem-solving through a structured thinking process.
     cmd: npx
     args:
     - -y
-    - 'shadcn@latest'
+    - '@modelcontextprotocol/server-sequential-thinking'
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  shadcnui:
+    enabled: true
+    type: stdio
+    name: shadcn UI
+    description: A shadcn/ui-native MCP server enabling structured component metadata, actions, and UI-aware tooling.
+    cmd: npx
+    args:
+    - -y
+    - shadcn@latest
     - mcp
     envs: {}
     env_keys: []
     timeout: 300
     bundled: null
     available_tools: []
-  open_websearch:
-    enabled: false
+  excalidraw:
+    enabled: true
+    type: streamable_http
+    name: Excalidraw
+    description: Excalidraw MCP App for diagramming
+    uri: https://excalidraw-mcp-app.vercel.app/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  openwebsearch:
+    enabled: true
     type: stdio
     name: Open WebSearch
     description: A Multi-engine MCP server, CLI, and local daemon, that can also be paired with skill-guided agent workflows for live web search and content retrieval.
     cmd: npx
     args:
     - -y
-    - 'open-websearch@latest'
-    - mcp
+    - open-websearch@latest
     envs: {}
-    env_keys: []
+    env_keys:
+    - ENABLE_CORS
+    - MODE
     timeout: 300
     bundled: null
-    available_tools: []  
+    available_tools: []
+  containertracking:
+    enabled: false
+    type: streamable_http
+    name: Container Tracking
+    description: An MCP server for container tracking with an AI-native service that monitors shipments, explains exceptions, predicts demurrage risk, and gives freight teams and AI agents live access to container status.
+    uri: https://mcp.trackingmcp.com/mcp
+    envs: {}
+    env_keys:
+    - TRACKINGMCP_API_KEY
+    headers:
+      Authorization: Bearer ${TRACKINGMCP_API_KEY}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  mcpjungle_legal:
+    enabled: false
+    type: streamable_http
+    name: MCPJungle:Legal
+    description: Tools useful for Legal Services
+    uri: http://localhost:8080/v0/groups/legal/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  mcpjungle_money:
+    enabled: false
+    type: streamable_http
+    name: MCPJungle:Money
+    description: Tools useful for personal finance
+    uri: http://localhost:8080/v0/groups/money/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  mcpjungle_finance:
+    enabled: false
+    type: streamable_http
+    name: MCPJungle:Finance
+    description: Tools useful for investing and trading
+    uri: http://localhost:8080/v0/groups/finance/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  mcpjungle_websearch:
+    enabled: false
+    type: streamable_http
+    name: MCPJungle:Web Search
+    description: Tools used for web search
+    uri: http://localhost:8080/v0/groups/web-search/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  mcpjungle_travel:
+    enabled: false
+    type: streamable_http
+    name: MCPJungle:Travel
+    description: Tools useful for vacation planning
+    uri: http://localhost:8080/v0/groups/travel/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  mcpjungle_careers:
+    enabled: false
+    type: streamable_http
+    name: MCPJungle:Careers
+    description: Tools useful for job search
+    uri: http://localhost:8080/v0/groups/careers/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  mcpjungle_alternativemarkets:
+    enabled: false
+    type: streamable_http
+    name: MCPJungle:Alternative Markets
+    description: Tools useful for trading alternative markets including crypto and prediction markets
+    uri: http://localhost:8080/v0/groups/alternative-markets/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  agentgateway_services:
+    enabled: false
+    type: streamable_http
+    name: agentgateway:services
+    description: Services for location and weather, date and time, holiday calendars and MCP registry
+    uri: http://localhost:15010/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  agentgateway_careers:
+    enabled: false
+    type: streamable_http
+    name: agentgateway:careers
+    description: Listings from job boards at jobicy.com and jobrise.io, etc
+    uri: http://localhost:15011/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  agentgateway_media:
+    enabled: false
+    type: streamable_http
+    name: agentgateway:media
+    description: Access to online collections for books, movies & tv, music, and museums
+    uri: http://localhost:15012/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
 providers:
-  openai:
+  custom_llama-server:
     enabled: true
     model: unsloth/gemma-4-26B-A4B-it-GGUF:UD-Q4_K_XL
     configured: true
-OPENAI_BASE_URL: http://localhost:11434
-OPENAI_HOST: http://localhost:11434
-OPENAI_BASE_PATH: v1/chat/completions
 OPENAI_TIMEOUT: '600'
 GOOSE_TELEMETRY_ENABLED: true
 voice_dictation_provider: local
 LOCAL_WHISPER_MODEL: base
 GOOSE_MODE: auto
 GOOSE_DISABLE_KEYRING: true
-active_provider: openai
+active_provider: custom_llama-server
+GOOSE_THINKING_EFFORT: medium
+OPENAI_BASE_URL: http://localhost:11434
+OPENAI_HOST: http://localhost:11434
+OPENAI_BASE_PATH: v1/chat/completions

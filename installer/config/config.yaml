@@ -315,37 +315,6 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
-  huggingface:
-    enabled: false
-    type: streamable_http
-    name: ' Hugging Face'
-    description: Connect assistants to the Hub and thousands of AI Apps
-    uri: https://huggingface.co/mcp
-    envs: {}
-    env_keys:
-    - HF_TOKEN
-    headers:
-      Authorization: Bearer ${HF_TOKEN}
-    timeout: 300
-    socket: null
-    bundled: null
-    available_tools: []
-  awsdocumentation:
-    enabled: false
-    type: stdio
-    name: AWS Documentation
-    description: Tools to access AWS documentation, search for content, and get recommendations.
-    cmd: uvx
-    args:
-    - awslabs.aws-documentation-mcp-server@latest
-    envs: {}
-    env_keys:
-    - FASTMCP_LOG_LEVEL
-    - AWS_DOCUMENTATION_PARTITION
-    - MCP_USER_AGENT
-    timeout: 300
-    bundled: null
-    available_tools: []
   git:
     enabled: true
     type: stdio
@@ -411,21 +380,6 @@ extensions:
     envs: {}
     env_keys: []
     headers: {}
-    timeout: 300
-    socket: null
-    bundled: null
-    available_tools: []
-  containertracking:
-    enabled: false
-    type: streamable_http
-    name: Container Tracking
-    description: An MCP server for container tracking with an AI-native service that monitors shipments, explains exceptions, predicts demurrage risk, and gives freight teams and AI agents live access to container status.
-    uri: https://mcp.trackingmcp.com/mcp
-    envs: {}
-    env_keys:
-    - TRACKINGMCP_API_KEY
-    headers:
-      Authorization: Bearer ${TRACKINGMCP_API_KEY}
     timeout: 300
     socket: null
     bundled: null
@@ -521,38 +475,12 @@ extensions:
     socket: null
     bundled: null
     available_tools: []
-  agentgateway_services:
+  mcpjungle_culture:
     enabled: false
     type: streamable_http
-    name: agentgateway:services
-    description: Services for location and weather, date and time, holiday calendars and MCP registry
-    uri: http://localhost:15010/mcp
-    envs: {}
-    env_keys: []
-    headers: {}
-    timeout: 300
-    socket: null
-    bundled: null
-    available_tools: []
-  agentgateway_careers:
-    enabled: false
-    type: streamable_http
-    name: agentgateway:careers
-    description: Listings from job boards at jobicy.com and jobrise.io, etc
-    uri: http://localhost:15011/mcp
-    envs: {}
-    env_keys: []
-    headers: {}
-    timeout: 300
-    socket: null
-    bundled: null
-    available_tools: []
-  agentgateway_media:
-    enabled: false
-    type: streamable_http
-    name: agentgateway:media
-    description: Access to online collections for books, movies & tv, music, and museums
-    uri: http://localhost:15012/mcp
+    name: MCPJungle:Alternative Markets
+    description: Tools related culture
+    uri: http://localhost:8080/v0/groups/culture/mcp
     envs: {}
     env_keys: []
     headers: {}
@@ -563,7 +491,7 @@ extensions:
 providers:
   openai:
     enabled: true
-    model: unsloth/gemma-4-26B-A4B-it-GGUF:UD-Q4_K_XL
+    model: gemma-4-26b-a4b
     configured: true
 OPENAI_TIMEOUT: '600'
 GOOSE_TELEMETRY_ENABLED: true

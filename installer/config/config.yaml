@@ -1,82 +1,27 @@
 extensions:
-  todo:
+  analyze:
     enabled: true
     type: platform
-    name: todo
-    description: Enable a todo list for goose so it can keep track of what it is doing
-    display_name: Todo
+    name: analyze
+    description: 'Analyze code structure with tree-sitter: directory overviews, file details, symbol call graphs'
+    display_name: Analyze
     bundled: true
     available_tools: []
   apps:
-    enabled: false
+    enabled: true
     type: platform
     name: apps
     description: Create and manage custom Goose apps through chat. Apps are HTML/CSS/JavaScript and run in sandboxed windows.
     display_name: Apps
     bundled: true
     available_tools: []
-  extensionmanager:
+  autovisualiser:
     enabled: true
-    type: platform
-    name: Extension Manager
-    description: Enable extension management tools for discovering, enabling, and disabling extensions
-    display_name: Extension Manager
-    bundled: true
-    available_tools: []
-  skills:
-    enabled: true
-    type: platform
-    name: skills
-    description: Discover and provide skill instructions from filesystem and builtins
-    display_name: Skills
-    bundled: true
-    available_tools: []
-  developer:
-    enabled: true
-    type: platform
-    name: developer
-    description: Write and edit files, and execute shell commands
-    display_name: Developer
-    bundled: true
-    available_tools: []
-  orchestrator:
-    enabled: true
-    type: platform
-    name: orchestrator
-    description: 'Manage agent sessions: list, view, start, send messages, interrupt, and stop agents'
-    display_name: Orchestrator
-    bundled: true
-    available_tools: []
-  code_execution:
-    enabled: false
-    type: platform
-    name: code_execution
-    description: Goose will make extension calls through code execution, saving tokens
-    display_name: Code Mode
-    bundled: true
-    available_tools: []
-  tom:
-    enabled: false
-    type: platform
-    name: tom
-    description: Inject custom context into every turn via GOOSE_MOIM_MESSAGE_TEXT and GOOSE_MOIM_MESSAGE_FILE environment variables
-    display_name: Top Of Mind
-    bundled: true
-    available_tools: []
-  summarize:
-    enabled: false
-    type: platform
-    name: summarize
-    description: Load files/directories and get an LLM summary in a single call
-    display_name: Summarize
-    bundled: true
-    available_tools: []
-  summon:
-    enabled: true
-    type: platform
-    name: summon
-    description: Load knowledge and delegate tasks to subagents
-    display_name: Summon
+    type: builtin
+    name: autovisualiser
+    description: Data visualisation and UI generation tools
+    display_name: Auto Visualiser
+    timeout: 300
     bundled: true
     available_tools: []
   chatrecall:
@@ -87,21 +32,12 @@ extensions:
     display_name: Chat Recall
     bundled: true
     available_tools: []
-  analyze:
-    enabled: true
+  code_execution:
+    enabled: false
     type: platform
-    name: analyze
-    description: 'Analyze code structure with tree-sitter: directory overviews, file details, symbol call graphs'
-    display_name: Analyze
-    bundled: true
-    available_tools: []
-  memory:
-    enabled: true
-    type: builtin
-    name: memory
-    description: Tools to save and retrieve durable memories
-    display_name: Memory
-    timeout: 300
+    name: code_execution
+    description: Goose will make extension calls through code execution, saving tokens
+    display_name: Code Mode
     bundled: true
     available_tools: []
   computercontroller:
@@ -113,13 +49,61 @@ extensions:
     timeout: 300
     bundled: true
     available_tools: []
-  autovisualiser:
-    enabled: false
+  developer:
+    enabled: true
+    type: platform
+    name: developer
+    description: Write and edit files, and execute shell commands
+    display_name: Developer
+    bundled: true
+    available_tools: []
+  extensionmanager:
+    enabled: true
+    type: platform
+    name: Extension Manager
+    description: Enable extension management tools for discovering, enabling, and disabling extensions
+    display_name: Extension Manager
+    bundled: true
+    available_tools: []
+  memory:
+    enabled: true
     type: builtin
-    name: autovisualiser
-    description: Data visualisation and UI generation tools
-    display_name: Auto Visualiser
+    name: memory
+    description: Tools to save and retrieve durable memories
+    display_name: Memory
     timeout: 300
+    bundled: true
+    available_tools: []
+  orchestrator:
+    enabled: true
+    type: platform
+    name: orchestrator
+    description: 'Manage agent sessions: list, view, start, send messages, interrupt, and stop agents'
+    display_name: Orchestrator
+    bundled: true
+    available_tools: []
+  skills:
+    enabled: true
+    type: platform
+    name: skills
+    description: Discover and provide skill instructions from filesystem and builtins
+    display_name: Skills
+    bundled: true
+    available_tools: []
+  todo:
+    enabled: true
+    type: platform
+    name: todo
+    description: Enable a todo list for goose so it can keep track of what it is doing
+    display_name: Todo
+    bundled: true
+    available_tools: []
+  tom:
+    enabled: false
+    type: platform
+    name: tom
+    description: Inject custom context into every turn via GOOSE_MOIM_MESSAGE_TEXT and GOOSE_MOIM_MESSAGE_FILE environment variables
+    display_name: Top Of Mind
     bundled: true
     available_tools: []
   chromedevtools:
@@ -166,6 +150,33 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
+  excalidraw:
+    enabled: true
+    type: streamable_http
+    name: Excalidraw
+    description: Excalidraw MCP App for diagramming
+    uri: https://excalidraw-mcp-app.vercel.app/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  excel:
+    enabled: false
+    type: stdio
+    name: Excel
+    description: A Model Context Protocol server for Excel file manipulation
+    cmd: uvx
+    args:
+    - excel-mcp-server
+    - stdio
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
   fetch:
     enabled: true
     type: stdio
@@ -174,6 +185,19 @@ extensions:
     cmd: uvx
     args:
     - mcp-server-fetch
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  git:
+    enabled: true
+    type: stdio
+    name: git
+    description: MCP Git Server designed to interact with Git repositories, particularly useful for tasks such as repository management, branch operations, commit handling, and more.
+    cmd: uvx
+    args:
+    - mcp-server-git
     envs: {}
     env_keys: []
     timeout: 300
@@ -220,35 +244,6 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
-  youtubetranscript:
-    enabled: false
-    type: stdio
-    name: YouTube Transcript
-    description: Access YouTube video transcripts
-    cmd: uvx
-    args:
-    - --from
-    - git+https://github.com/jkawamoto/mcp-youtube-transcript
-    - mcp-youtube-transcript
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  sugar:
-    enabled: true
-    type: stdio
-    name: Sugar
-    description: Autonomous AI development system - delegate tasks and run 24/7
-    cmd: npx
-    args:
-    - -y
-    - sugarai-mcp
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
   playwright:
     enabled: false
     type: stdio
@@ -262,44 +257,6 @@ extensions:
     env_keys: []
     timeout: 300
     bundled: null
-    available_tools: []
-  selenium:
-    enabled: false
-    type: stdio
-    name: Selenium
-    description: Automates browser interactions
-    cmd: npx
-    args:
-    - -y
-    - '@angiejones/mcp-selenium'
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  repomix:
-    enabled: false
-    type: stdio
-    name: Repomix
-    description: Pack repositories into AI-friendly formats for goose
-    cmd: npx
-    args:
-    - -y
-    - repomix
-    - --mcp
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  tutorial:
-    enabled: false
-    type: builtin
-    name: tutorial
-    description: Access interactive tutorials and guides
-    display_name: Tutorial
-    timeout: 300
-    bundled: true
     available_tools: []
   prompts_chat:
     enabled: true
@@ -315,28 +272,16 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
-  git:
-    enabled: true
-    type: stdio
-    name: git
-    description: MCP Git Server designed to interact with Git repositories, particularly useful for tasks such as repository management, branch operations, commit handling, and more.
-    cmd: uvx
-    args:
-    - mcp-server-git
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  excel:
+  repomix:
     enabled: false
     type: stdio
-    name: Excel
-    description: A Model Context Protocol server for Excel file manipulation
-    cmd: uvx
+    name: Repomix
+    description: Pack repositories into AI-friendly formats for goose
+    cmd: npx
     args:
-    - excel-mcp-server
-    - stdio
+    - -y
+    - repomix
+    - --mcp
     envs: {}
     env_keys: []
     timeout: 300
@@ -371,12 +316,106 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
-  excalidraw:
+  sugar:
     enabled: true
+    type: stdio
+    name: Sugar
+    description: Autonomous AI development system - delegate tasks and run 24/7
+    cmd: npx
+    args:
+    - -y
+    - sugarai-mcp
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  summarize:
+    enabled: false
+    type: platform
+    name: summarize
+    description: Load files/directories and get an LLM summary in a single call
+    display_name: Summarize
+    bundled: true
+    available_tools: []
+  summon:
+    enabled: true
+    type: platform
+    name: summon
+    description: Load knowledge and delegate tasks to subagents
+    display_name: Summon
+    bundled: true
+    available_tools: []
+  selenium:
+    enabled: false
+    type: stdio
+    name: Selenium
+    description: Automates browser interactions
+    cmd: npx
+    args:
+    - -y
+    - '@angiejones/mcp-selenium'
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  tutorial:
+    enabled: false
+    type: builtin
+    name: tutorial
+    description: Access interactive tutorials and guides
+    display_name: Tutorial
+    timeout: 300
+    bundled: true
+    available_tools: []
+  youtubetranscript:
+    enabled: false
+    type: stdio
+    name: YouTube Transcript
+    description: Access YouTube video transcripts
+    cmd: uvx
+    args:
+    - --from
+    - git+https://github.com/jkawamoto/mcp-youtube-transcript
+    - mcp-youtube-transcript
+    envs: {}
+    env_keys: []
+    timeout: 300
+    bundled: null
+    available_tools: []
+  mcpjungle_alternativemarkets:
+    enabled: false
     type: streamable_http
-    name: Excalidraw
-    description: Excalidraw MCP App for diagramming
-    uri: https://excalidraw-mcp-app.vercel.app/mcp
+    name: MCPJungle:Alternative Markets
+    description: Tools useful for trading alternative markets including crypto and prediction markets
+    uri: http://localhost:8080/v0/groups/alternative-markets/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  mcpjungle_careers:
+    enabled: false
+    type: streamable_http
+    name: MCPJungle:Careers
+    description: Tools useful for job search
+    uri: http://localhost:8080/v0/groups/careers/mcp
+    envs: {}
+    env_keys: []
+    headers: {}
+    timeout: 300
+    socket: null
+    bundled: null
+    available_tools: []
+  mcpjungle_culture:
+    enabled: false
+    type: streamable_http
+    name: MCPJungle:Alternative Markets
+    description: Tools related culture
+    uri: http://localhost:8080/v0/groups/culture/mcp
     envs: {}
     env_keys: []
     headers: {}
@@ -423,19 +462,6 @@ extensions:
     socket: null
     bundled: null
     available_tools: []
-  mcpjungle_websearch:
-    enabled: false
-    type: streamable_http
-    name: MCPJungle:Web Search
-    description: Tools used for web search
-    uri: http://localhost:8080/v0/groups/web-search/mcp
-    envs: {}
-    env_keys: []
-    headers: {}
-    timeout: 300
-    socket: null
-    bundled: null
-    available_tools: []
   mcpjungle_travel:
     enabled: false
     type: streamable_http
@@ -449,38 +475,12 @@ extensions:
     socket: null
     bundled: null
     available_tools: []
-  mcpjungle_careers:
+  mcpjungle_websearch:
     enabled: false
     type: streamable_http
-    name: MCPJungle:Careers
-    description: Tools useful for job search
-    uri: http://localhost:8080/v0/groups/careers/mcp
-    envs: {}
-    env_keys: []
-    headers: {}
-    timeout: 300
-    socket: null
-    bundled: null
-    available_tools: []
-  mcpjungle_alternativemarkets:
-    enabled: false
-    type: streamable_http
-    name: MCPJungle:Alternative Markets
-    description: Tools useful for trading alternative markets including crypto and prediction markets
-    uri: http://localhost:8080/v0/groups/alternative-markets/mcp
-    envs: {}
-    env_keys: []
-    headers: {}
-    timeout: 300
-    socket: null
-    bundled: null
-    available_tools: []
-  mcpjungle_culture:
-    enabled: false
-    type: streamable_http
-    name: MCPJungle:Alternative Markets
-    description: Tools related culture
-    uri: http://localhost:8080/v0/groups/culture/mcp
+    name: MCPJungle:Web Search
+    description: Tools used for web search
+    uri: http://localhost:8080/v0/groups/web-search/mcp
     envs: {}
     env_keys: []
     headers: {}

@@ -491,7 +491,7 @@ extensions:
 providers:
   openai:
     enabled: true
-    model: gemma-4-26b-a4b
+    model: gemma-4-12b
     configured: true
 OPENAI_TIMEOUT: '600'
 GOOSE_TELEMETRY_ENABLED: true

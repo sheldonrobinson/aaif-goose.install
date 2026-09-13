@@ -31,6 +31,13 @@ on:
   push:
     tags:
       - "v*"
+  # ── Weekly release bot ───────────────────────────────────
+  # Checks the parent repo (aaif-goose/goose) for a new release
+  # every Friday at 6:00 PM PST (= 02:00 UTC Saturday).
+  # If the parent published a newer version, the bot pushes a
+  # matching tag which re-triggers this workflow on the tag push.
+  schedule:
+    - cron: "0 2 * * 6" # Saturdays 02:00 UTC == Fridays 6:00 PM PST
 
 concurrency:
   group: release-${{ github.ref }}
@@ -44,11 +51,74 @@ permissions:
 
 jobs:
   # ──────────────────────────────────────────────────────────
+  #  JOB 0 – Weekly bot: check parent repo for a new release
+  #
+  #  Parent  : https://github.com/aaif-goose/goose
+  #  Rule    : {Project-Version} = {Parent-Version}.0
+  #            Parent v1.2.3 → Project 1.2.3.0 (tag v1.2.3)
+  #
+  #  Runs on the schedule trigger only. When the parent has a
+  #  newer release than our latest tag, the bot creates and
+  #  pushes the corresponding tag; the tag push then triggers
+  #  the full build & release pipeline below.
+  # ──────────────────────────────────────────────────────────
+  check-parent:
+    name: Check parent repo for new release
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PARENT_REPO: aaif-goose/goose
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+      tag:     ${{ steps.check.outputs.tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN }}   # PAT so the tag push triggers workflows
+
+      - name: Compare parent release to local tags
+        id: check
+        shell: pwsh
+        run: |
+          # Latest release tag of the parent repository (e.g. v1.2.3)
+          $parentTag = (gh release view --repo $env:PARENT_REPO --json tagName --jq .tagName).Trim()
+          if ([string]::IsNullOrWhiteSpace($parentTag)) { throw "Could not resolve latest release of $env:PARENT_REPO" }
+
+          # Versioning rule: {Project-Version} = {Parent-Version}.0
+          # Tag stays vX.Y.Z – the build job pads Build to .0
+          $newTag = "v{0}" -f $parentTag.TrimStart('v')
+
+          $exists = (git tag -l $newTag) -or (git ls-remote --tags origin $newTag)
+          if ($exists) {
+            Write-Host "Tag $newTag already released – nothing to do."
+            "changed=false" | Out-File $env:GITHUB_OUTPUT -Append
+            "tag=$newTag"   | Out-File $env:GITHUB_OUTPUT -Append
+            return
+          }
+
+          Write-Host "[::bot::] New parent release detected: $parentTag → pushing tag $newTag"
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag $newTag
+          git push origin $newTag   # RELEASE_TOKEN (PAT) → tag push re-triggers this workflow
+          "changed=true" | Out-File $env:GITHUB_OUTPUT -Append
+          "tag=$newTag"  | Out-File $env:GITHUB_OUTPUT -Append
+
+  # ──────────────────────────────────────────────────────────
   #  JOB 1 – Download ZIP, extract Goose.exe, build MSIs
   # ──────────────────────────────────────────────────────────
   build-msi:
     name: Build MSI packages
     runs-on: windows-latest
+    needs: check-parent
+    # On scheduled runs check-parent only pushes the new tag;
+    # the resulting tag-push run performs the actual build.
+    if: ${{ always() && github.event_name != 'schedule' }}
 
     outputs:
       version:       ${{ steps.get-version.outputs.version }}

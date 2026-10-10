@@ -73,8 +73,6 @@ $gooseExe = Join-Path $SourceDir "Goose.exe"
 
 $vFile   = Join-Path $ScriptDir "version.txt"
 $version = if (Test-Path $vFile) { (Get-Content $vFile -Raw).Trim() } else { "1.0.0.0" }
-Write-Warning "Goose.exe not found in SourceDir – using version $version from version.txt."
-
 
 # Short version for MSI filename (drop 4th field)
 $shortVer = ($version -split '\.')[ 0..2 ] -join '.'

@@ -268,11 +268,11 @@
 			  the user's edits are preserved. The file is only written on a fresh install.
 			-->
 			<Component Id="GooseConfig"
-			           Guid="C1D2E3F4-A5B6-7890-C1D2-E3F4A5B67890"
+			           Guid="1D71BA18-C8BB-4A9D-BA28-C7A47F198B2A"
 			           NeverOverwrite="yes">
 				<File Id="GooseConfigYaml"
 				      Name="config.yaml"
-				      Source="$(ConfigDir)\config.yaml"
+				      Source="$(ConfigDir)\init-config.yaml"
 				      KeyPath="yes"/>
 				<!-- Remove the Block\goose\config folder on uninstall if it is empty -->
 				<RemoveFolder Id="RemoveAppDataGooseConfig"
